@@ -1,0 +1,72 @@
+@import "tailwindcss";
+
+@theme inline {
+  --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, monospace;
+}
+
+html,
+body {
+  height: 100%;
+}
+
+body {
+  background-color: var(--color-slate-100);
+  color: var(--color-slate-900);
+  font-family: var(--font-sans);
+}
+
+/* Slim scrollbars keep dense data tables from feeling heavy. */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-slate-300) transparent;
+}
+
+*::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+*::-webkit-scrollbar-thumb {
+  background-color: var(--color-slate-300);
+  border-radius: 9999px;
+}
+
+*::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+@utility card-surface {
+  background-color: var(--color-white);
+  border-radius: var(--radius-2xl);
+  border: 1px solid var(--color-slate-200);
+  box-shadow: 0 1px 2px 0 rgb(15 23 42 / 0.04);
+}
+
+@keyframes qms-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes qms-pop-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@utility animate-fade-in {
+  animation: qms-fade-in 0.15s ease-out;
+}
+
+@utility animate-pop-in {
+  animation: qms-pop-in 0.18s ease-out;
+}

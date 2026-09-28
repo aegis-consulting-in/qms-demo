@@ -1,80 +1,51 @@
-"use client";
+"use client"
 
-import type { ButtonHTMLAttributes, ReactNode } from "react";
-import { cx } from "@/lib/utils";
+import { Button as ButtonPrimitive } from "@base-ui/react/button"
+import { cva, type VariantProps } from "class-variance-authority"
+import { cn } from "cn"
 
-type Variant = "primary" | "secondary" | "ghost" | "danger" | "success" | "subtle";
-type Size = "xs" | "sm" | "md";
+const buttonVariants = cva(
+  "inline-flex shrink-0 items-center justify-center gap-2 rounded-md text-sm font-medium whitespace-nowrap transition-all outline-none select-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 disabled:pointer-events-none disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-3 aria-invalid:ring-destructive/20 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
+  {
+    variants: {
+      variant: {
+        default: "bg-primary text-primary-foreground hover:bg-primary/90",
+        outline: "border border-input bg-background hover:bg-muted hover:text-foreground",
+        secondary: "bg-secondary text-secondary-foreground hover:bg-secondary/80",
+        ghost: "hover:bg-muted hover:text-foreground",
+        destructive: "bg-destructive text-white hover:bg-destructive/90 focus-visible:ring-destructive/30",
+        link: "text-primary underline-offset-4 hover:underline",
+      },
+      size: {
+        default: "h-8 px-3",
+        sm: "h-7 gap-1 px-2.5 text-xs",
+        lg: "h-9 px-4",
+        icon: "size-8",
+        "icon-sm": "size-7",
+        "icon-lg": "size-9",
+      },
+    },
+    defaultVariants: { variant: "default", size: "default" },
+  },
+)
 
-const variants: Record<Variant, string> = {
-  primary:
-    "bg-indigo-600 text-white shadow-sm hover:bg-indigo-700 focus-visible:outline-indigo-600 disabled:bg-indigo-300",
-  secondary:
-    "bg-white text-slate-700 ring-1 ring-inset ring-slate-300 hover:bg-slate-50 focus-visible:outline-slate-400",
-  ghost: "text-slate-600 hover:bg-slate-100 hover:text-slate-900 focus-visible:outline-slate-400",
-  danger:
-    "bg-rose-600 text-white shadow-sm hover:bg-rose-700 focus-visible:outline-rose-600 disabled:bg-rose-300",
-  success:
-    "bg-emerald-600 text-white shadow-sm hover:bg-emerald-700 focus-visible:outline-emerald-600 disabled:bg-emerald-300",
-  subtle: "bg-slate-100 text-slate-700 hover:bg-slate-200 focus-visible:outline-slate-400",
-};
-
-const sizes: Record<Size, string> = {
-  xs: "gap-1 px-2 py-1 text-xs",
-  sm: "gap-1.5 px-2.5 py-1.5 text-xs",
-  md: "gap-2 px-3.5 py-2 text-sm",
-};
-
-interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
-  variant?: Variant;
-  size?: Size;
-  icon?: ReactNode;
-}
-
-export function Button({
-  variant = "primary",
-  size = "md",
-  icon,
+function Button({
   className,
-  children,
-  type = "button",
-  ...rest
-}: ButtonProps) {
+  variant,
+  size,
+  nativeButton,
+  render,
+  ...props
+}: ButtonPrimitive.Props & VariantProps<typeof buttonVariants>) {
   return (
-    <button
-      type={type}
-      className={cx(
-        "inline-flex items-center justify-center rounded-lg font-semibold transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 disabled:cursor-not-allowed disabled:opacity-60",
-        variants[variant],
-        sizes[size],
-        className,
-      )}
-      {...rest}
-    >
-      {icon}
-      {children}
-    </button>
-  );
+    <ButtonPrimitive
+      data-slot="button"
+      className={cn(buttonVariants({ variant, size, className }))}
+      nativeButton={nativeButton ?? !render}
+      render={render}
+      {...props}
+    />
+  )
 }
 
-export function IconButton({
-  className,
-  label,
-  icon,
-  ...rest
-}: ButtonHTMLAttributes<HTMLButtonElement> & { label: string; icon: ReactNode }) {
-  return (
-    <button
-      type="button"
-      title={label}
-      aria-label={label}
-      className={cx(
-        "inline-flex h-8 w-8 items-center justify-center rounded-lg text-slate-500 transition-colors hover:bg-slate-100 hover:text-slate-900 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-400",
-        className,
-      )}
-      {...rest}
-    >
-      {icon}
-    </button>
-  );
-}
+export { Button, buttonVariants }

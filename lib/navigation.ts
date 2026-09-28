@@ -1,103 +1,190 @@
+import type { LucideIcon } from "lucide-react";
 import {
-  ClipboardCheck,
-  FolderKanban,
-  GraduationCap,
-  LayoutDashboard,
-  Settings,
-  Truck,
-  Wrench,
-  type LucideIcon,
+  BriefcaseIcon,
+  ClipboardCheckIcon,
+  FileTextIcon,
+  FolderIcon,
+  GraduationCapIcon,
+  ScrollTextIcon,
+  SettingsIcon,
+  ShieldIcon,
+  TruckIcon,
+  UsersIcon,
+  WrenchIcon,
 } from "lucide-react";
-import type { UserRole } from "./types";
+import { MODULE_ACCESS, PERMISSIONS, type PermissionKey } from "@/lib/auth/permissions";
 
-export interface NavItem {
-  href: "/" | "/training" | "/maintenance" | "/suppliers" | "/projects" | "/audits" | "/admin";
+export type ModuleDef = {
+  key: string;
   label: string;
-  shortLabel: string;
   description: string;
+  href: string;
   icon: LucideIcon;
-  roles?: UserRole[];
-}
+  /** Any-of permissions. Empty array → every signed-in user. */
+  permissions: PermissionKey[];
+};
 
-export const navItems: NavItem[] = [
+/** Full-width module buttons on the home page (order matches qms_mock/home.png). */
+export const MODULES: ModuleDef[] = [
   {
-    href: "/",
-    label: "Dashboard",
-    shortLabel: "Dashboard",
-    description: "Compliance overview across every module",
-    icon: LayoutDashboard,
-  },
-  {
-    href: "/training",
+    key: "training",
     label: "Training Management",
-    shortLabel: "Training",
-    description: "Employees, course registry, assignments and approvals",
-    icon: GraduationCap,
+    description: "Catalogue, assignments and team progress",
+    href: "/training",
+    icon: GraduationCapIcon,
+    permissions: [], // everyone has "My Trainings"
   },
   {
-    href: "/maintenance",
+    key: "maintenance",
     label: "Preventive Maintenance",
-    shortLabel: "PPM",
-    description: "Asset registry, maintenance logs and document index",
-    icon: Wrench,
+    description: "Assets, schedules and maintenance records",
+    href: "/maintenance",
+    icon: WrenchIcon,
+    permissions: MODULE_ACCESS.maintenance,
   },
   {
-    href: "/suppliers",
+    key: "suppliers",
     label: "Supplier Management",
-    shortLabel: "Suppliers",
-    description: "Vendor registry and re-qualification tracking",
-    icon: Truck,
+    description: "Supplier register, evaluations and reviews",
+    href: "/suppliers",
+    icon: TruckIcon,
+    permissions: MODULE_ACCESS.suppliers,
   },
   {
-    href: "/projects",
+    key: "projects",
     label: "Project Management",
-    shortLabel: "Projects",
-    description: "Projects, phases, milestones and tasks",
-    icon: FolderKanban,
+    description: "Projects, members and milestones",
+    href: "/projects",
+    icon: BriefcaseIcon,
+    permissions: [], // members / PMs can see their own projects
   },
   {
-    href: "/audits",
+    key: "audits",
     label: "Audit Process",
-    shortLabel: "Audits",
-    description: "Process audits, sub-processes, KPIs and evidence",
-    icon: ClipboardCheck,
+    description: "Audit plans, findings and corrective actions",
+    href: "/audits",
+    icon: ClipboardCheckIcon,
+    permissions: [], // auditors see their own audits
   },
   {
-    href: "/admin",
+    key: "admin",
     label: "Admin Settings",
-    shortLabel: "Admin",
-    description: "Role simulation and reminder configuration",
-    icon: Settings,
-    roles: ["System Admin"],
+    description: "Users, roles, permissions and settings",
+    href: "/admin",
+    icon: SettingsIcon,
+    permissions: MODULE_ACCESS.admin,
   },
 ];
 
-export const roleOptions: Array<{ role: UserRole; summary: string; capabilities: string[] }> = [
+/** Secondary module (reached from Training → Employee Details). Not on the home list. */
+export const EMPLOYEE_MODULE: ModuleDef = {
+  key: "employees",
+  label: "Employee Management",
+  description: "People, departments and reporting lines",
+  href: "/employees",
+  icon: UsersIcon,
+  permissions: MODULE_ACCESS.employees,
+};
+
+export type FolderDef = {
+  key: "training" | "project" | "supplier" | "preventive-maintenance" | "audit" | "employee";
+  label: string;
+  href: string;
+  icon: LucideIcon;
+  home?: boolean;
+};
+
+/** Folder shortcuts. `home: true` appears on the dashboard row (matches the mock). */
+export const FOLDERS: FolderDef[] = [
+  { key: "training", label: "Training Documents", href: "/documents/training", icon: FolderIcon, home: true },
+  { key: "project", label: "Project Documents", href: "/documents/project", icon: FolderIcon, home: true },
+  { key: "supplier", label: "Supplier Documents", href: "/documents/supplier", icon: FolderIcon, home: true },
+  { key: "preventive-maintenance", label: "Preventive Maintenance", href: "/documents/preventive-maintenance", icon: FolderIcon, home: true },
+  { key: "audit", label: "Audit Documents", href: "/documents/audit", icon: FolderIcon },
+  { key: "employee", label: "Employee Documents", href: "/documents/employee", icon: FolderIcon },
+];
+
+export type AdminSection = {
+  key: string;
+  label: string;
+  description: string;
+  href: string;
+  icon: LucideIcon;
+  permissions: PermissionKey[];
+};
+
+/** Admin dashboard tiles. Extra settings can be added here without restructuring routes. */
+export const ADMIN_SECTIONS: AdminSection[] = [
   {
-    role: "Standard Employee",
-    summary: "Can complete their own training and raise maintenance requests.",
-    capabilities: [
-      "My Training: start, attach evidence, submit for review",
-      "Read-only access to registries",
-      "Cannot approve submissions or edit master data",
-    ],
+    key: "users",
+    label: "User Management",
+    description: "Create accounts, assign roles, activate or deactivate users",
+    href: "/admin/users",
+    icon: UsersIcon,
+    permissions: [PERMISSIONS.admin.users],
   },
   {
-    role: "Manager",
-    summary: "Reviews submissions and owns module master data.",
-    capabilities: [
-      "Approve or reject training submissions with comments",
-      "Create and edit employees, courses, assets, suppliers, projects, audits",
-      "Cannot change platform settings",
-    ],
+    key: "roles",
+    label: "Role Management",
+    description: "Create roles and assign permissions",
+    href: "/admin/roles",
+    icon: ShieldIcon,
+    permissions: [PERMISSIONS.admin.roles],
   },
   {
-    role: "System Admin",
-    summary: "Full platform control including settings and reminders.",
-    capabilities: [
-      "Everything a Manager can do",
-      "Admin Settings, role simulation, reminder rules",
-      "Reset the local demo data set",
-    ],
+    key: "permissions",
+    label: "Permission Management",
+    description: "Browse every permission grouped by module",
+    href: "/admin/permissions",
+    icon: ShieldIcon,
+    permissions: [PERMISSIONS.admin.permissions],
+  },
+  {
+    key: "departments",
+    label: "Departments",
+    description: "Organisation units used across employees, audits and assets",
+    href: "/admin/departments",
+    icon: BriefcaseIcon,
+    permissions: [PERMISSIONS.admin.settings],
+  },
+  {
+    key: "job-titles",
+    label: "Job Titles",
+    description: "Master list of job titles for employee records",
+    href: "/admin/job-titles",
+    icon: UsersIcon,
+    permissions: [PERMISSIONS.admin.settings],
+  },
+  {
+    key: "training-config",
+    label: "Training Configuration",
+    description: "Training levels and statuses used in the catalogue",
+    href: "/admin/training-config",
+    icon: GraduationCapIcon,
+    permissions: [PERMISSIONS.admin.settings],
+  },
+  {
+    key: "documents",
+    label: "Document Management",
+    description: "Search files across modules the admin is authorised to see",
+    href: "/admin/documents",
+    icon: FileTextIcon,
+    permissions: [PERMISSIONS.admin.documents],
+  },
+  {
+    key: "audit-logs",
+    label: "Audit Logs",
+    description: "Who did what, when, and to which record",
+    href: "/admin/audit-logs",
+    icon: ScrollTextIcon,
+    permissions: [PERMISSIONS.admin.auditLogs],
+  },
+  {
+    key: "settings",
+    label: "System Settings",
+    description: "Application name, organisation and reminder configuration",
+    href: "/admin/settings",
+    icon: SettingsIcon,
+    permissions: [PERMISSIONS.admin.settings],
   },
 ];

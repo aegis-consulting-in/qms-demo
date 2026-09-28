@@ -1,109 +1,34 @@
-import type { ReactNode } from "react";
-import { cx } from "@/lib/utils";
+import * as React from "react"
+import { cn } from "cn"
 
-export function Card({ children, className }: { children: ReactNode; className?: string }) {
-  return <section className={cx("card-surface", className)}>{children}</section>;
-}
-
-export function CardHeader({
-  title,
-  description,
-  actions,
-  icon,
-  className,
-}: {
-  title: ReactNode;
-  description?: ReactNode;
-  actions?: ReactNode;
-  icon?: ReactNode;
-  className?: string;
-}) {
+function Card({ className, ...props }: React.ComponentProps<"div">) {
   return (
-    <header
-      className={cx(
-        "flex flex-col gap-3 border-b border-slate-200 px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-5",
-        className,
-      )}
-    >
-      <div className="flex min-w-0 items-start gap-3">
-        {icon ? (
-          <span className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-indigo-50 text-indigo-600">
-            {icon}
-          </span>
-        ) : null}
-        <div className="min-w-0">
-          <h2 className="truncate text-sm font-semibold text-slate-900">{title}</h2>
-          {description ? <p className="mt-0.5 text-xs text-slate-500">{description}</p> : null}
-        </div>
-      </div>
-      {actions ? <div className="flex shrink-0 flex-wrap items-center gap-2">{actions}</div> : null}
-    </header>
-  );
+    <div
+      data-slot="card"
+      className={cn("flex flex-col gap-4 rounded-xl border bg-card py-4 text-card-foreground shadow-xs", className)}
+      {...props}
+    />
+  )
 }
 
-export function CardBody({ children, className }: { children: ReactNode; className?: string }) {
-  return <div className={cx("px-4 py-4 sm:px-5", className)}>{children}</div>;
+function CardHeader({ className, ...props }: React.ComponentProps<"div">) {
+  return <div data-slot="card-header" className={cn("flex flex-col gap-1 px-4", className)} {...props} />
 }
 
-export function StatTile({
-  label,
-  value,
-  hint,
-  icon,
-  tone = "indigo",
-}: {
-  label: string;
-  value: ReactNode;
-  hint?: ReactNode;
-  icon?: ReactNode;
-  tone?: "indigo" | "emerald" | "amber" | "rose" | "sky";
-}) {
-  const tones = {
-    indigo: "bg-indigo-50 text-indigo-600",
-    emerald: "bg-emerald-50 text-emerald-600",
-    amber: "bg-amber-50 text-amber-600",
-    rose: "bg-rose-50 text-rose-600",
-    sky: "bg-sky-50 text-sky-600",
-  } as const;
-
-  return (
-    <div className="card-surface flex items-center gap-3 p-4">
-      {icon ? (
-        <span className={cx("flex h-10 w-10 shrink-0 items-center justify-center rounded-xl", tones[tone])}>
-          {icon}
-        </span>
-      ) : null}
-      <div className="min-w-0">
-        <p className="text-xs font-medium tracking-wide text-slate-500 uppercase">{label}</p>
-        <p className="mt-0.5 text-xl font-semibold text-slate-900">{value}</p>
-        {hint ? <p className="truncate text-xs text-slate-500">{hint}</p> : null}
-      </div>
-    </div>
-  );
+function CardTitle({ className, ...props }: React.ComponentProps<"div">) {
+  return <div data-slot="card-title" className={cn("font-heading text-base font-semibold", className)} {...props} />
 }
 
-export function ProgressBar({
-  value,
-  tone = "indigo",
-  className,
-}: {
-  value: number;
-  tone?: "indigo" | "emerald" | "amber" | "rose";
-  className?: string;
-}) {
-  const tones = {
-    indigo: "bg-indigo-500",
-    emerald: "bg-emerald-500",
-    amber: "bg-amber-500",
-    rose: "bg-rose-500",
-  } as const;
-
-  return (
-    <div className={cx("h-1.5 w-full overflow-hidden rounded-full bg-slate-200", className)}>
-      <div
-        className={cx("h-full rounded-full transition-all duration-500", tones[tone])}
-        style={{ width: `${Math.min(100, Math.max(0, value))}%` }}
-      />
-    </div>
-  );
+function CardDescription({ className, ...props }: React.ComponentProps<"div">) {
+  return <div data-slot="card-description" className={cn("text-sm text-muted-foreground", className)} {...props} />
 }
+
+function CardContent({ className, ...props }: React.ComponentProps<"div">) {
+  return <div data-slot="card-content" className={cn("px-4", className)} {...props} />
+}
+
+function CardFooter({ className, ...props }: React.ComponentProps<"div">) {
+  return <div data-slot="card-footer" className={cn("flex items-center px-4", className)} {...props} />
+}
+
+export { Card, CardHeader, CardFooter, CardTitle, CardDescription, CardContent }

@@ -1,16 +1,21 @@
 "use client";
 
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Loader2Icon } from "lucide-react";
+import { toast } from "sonner";
 import type { z } from "zod";
+import { AttachFilesField } from "@/components/documents/attach-files-field";
+import { FileUpload } from "@/components/documents/file-upload";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { NativeSelect } from "@/components/ui/native-select";
 import { Textarea } from "@/components/ui/textarea";
 import { FormError, FormField, FormGrid } from "@/components/ui/form-field";
 import { createMaintenanceRecordAction, updateMaintenanceRecordAction } from "@/lib/actions/maintenance";
+import { uploadFilesToEntity } from "@/lib/documents/upload-client";
 import { useAction } from "@/lib/hooks/use-action";
 import { humanize } from "@/lib/format";
 import type { MaintenanceRecordRow } from "@/lib/types/database";
@@ -38,6 +43,7 @@ export function MaintenanceRecordForm({
 }) {
   const router = useRouter();
   const isEdit = Boolean(record);
+  const [pendingFiles, setPendingFiles] = useState<File[]>([]);
   const form = useForm<Values>({
     resolver: zodResolver(maintenanceRecordSchema),
     defaultValues: {
@@ -55,7 +61,16 @@ export function MaintenanceRecordForm({
     },
   });
   const { run, isPending, error, fieldErrors } = useAction(
-    async (values: Values) => (isEdit ? updateMaintenanceRecordAction({ id: record!.id, ...values }) : createMaintenanceRecordAction(values)),
+    async (values: Values) => {
+      const result = isEdit
+        ? await updateMaintenanceRecordAction({ id: record!.id, ...values })
+        : await createMaintenanceRecordAction(values);
+      if (result.ok && pendingFiles.length) {
+        const uploaded = await uploadFilesToEntity("preventive-maintenance", result.data.id, pendingFiles);
+        if (uploaded.ok) toast.success(uploaded.ok === 1 ? "File attached." : `${uploaded.ok} files attached.`);
+      }
+      return result;
+    },
     { successMessage: isEdit ? "Record updated." : "Maintenance record created.", onSuccess: (d) => router.push(`/maintenance/${d.id}`) },
   );
   const err = (k: keyof Values) => form.formState.errors[k]?.message ?? fieldErrors[k];
@@ -135,6 +150,11 @@ export function MaintenanceRecordForm({
       <FormField label="Notes / findings" htmlFor="notes" error={err("notes")}>
         <Textarea id="notes" rows={3} {...form.register("notes")} />
       </FormField>
+      {isEdit && record ? (
+        <FileUpload module="preventive-maintenance" entityId={record.id} compact />
+      ) : (
+        <AttachFilesField files={pendingFiles} onChange={setPendingFiles} disabled={isPending} />
+      )}
       <div className="flex items-center gap-2">
         <Button type="submit" disabled={isPending}>
           {isPending ? <Loader2Icon className="animate-spin" /> : null}

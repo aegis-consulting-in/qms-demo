@@ -1,6 +1,8 @@
 import "server-only";
 
 import { cache } from "react";
+import { unstable_cache } from "next/cache";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
 
 /** Small lookup lists used by forms. Cached per request. */
@@ -68,10 +70,26 @@ export const getEmployeeOptions = cache(async (onlyActive = true) => {
   return data;
 });
 
+const loadPublicSettings = unstable_cache(
+  async () => {
+    const admin = createAdminClient();
+    const { data } = await admin.from("system_settings").select("key, value").eq("is_public", true);
+    const map: Record<string, unknown> = {};
+    for (const row of data ?? []) map[row.key] = row.value;
+    return map;
+  },
+  ["public-system-settings"],
+  { revalidate: 300, tags: ["system-settings"] },
+);
+
 export const getPublicSettings = cache(async () => {
-  const supabase = await createClient();
-  const { data } = await supabase.from("system_settings").select("key, value");
-  const map: Record<string, unknown> = {};
-  for (const row of data ?? []) map[row.key] = row.value;
-  return map;
+  try {
+    return await loadPublicSettings();
+  } catch {
+    const supabase = await createClient();
+    const { data } = await supabase.from("system_settings").select("key, value");
+    const map: Record<string, unknown> = {};
+    for (const row of data ?? []) map[row.key] = row.value;
+    return map;
+  }
 });

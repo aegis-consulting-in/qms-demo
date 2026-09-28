@@ -2,16 +2,15 @@
 
 import { useCallback, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { CheckCircle2Icon, FileIcon, Loader2Icon, UploadCloudIcon, XCircleIcon, XIcon } from "lucide-react";
+import { CheckCircle2Icon, FileIcon, Loader2Icon, PaperclipIcon, UploadCloudIcon, XCircleIcon, XIcon } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "cn";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
-import { finalizeUploadAction, requestUploadAction } from "@/lib/actions/documents";
-import { createClient } from "@/lib/supabase/client";
-import { DOCUMENTS_BUCKET, formatBytes } from "@/lib/documents/storage";
+import { formatBytes } from "@/lib/documents/storage";
+import { uploadFileToEntity, validateFile } from "@/lib/documents/upload-client";
 import type { DocumentModule } from "@/lib/types/database";
-import { ALLOWED_EXTENSIONS, ALLOWED_MIME_TYPES, MAX_FILE_SIZE_BYTES } from "@/lib/validation/documents";
+import { ALLOWED_EXTENSIONS, MAX_FILE_SIZE_BYTES } from "@/lib/validation/documents";
 
 type QueuedFile = {
   id: string;
@@ -23,45 +22,9 @@ type QueuedFile = {
 
 const ACCEPT = ALLOWED_EXTENSIONS.map((e) => `.${e}`).join(",");
 
-function validateFile(file: File): string | null {
-  if (file.size === 0) return "File is empty.";
-  if (file.size > MAX_FILE_SIZE_BYTES) return `Exceeds the ${formatBytes(MAX_FILE_SIZE_BYTES)} limit.`;
-  const ext = file.name.split(".").pop()?.toLowerCase() ?? "";
-  if (!(ALLOWED_EXTENSIONS as readonly string[]).includes(ext)) return `.${ext || "?"} files are not allowed.`;
-  if (file.type && !(ALLOWED_MIME_TYPES as readonly string[]).includes(file.type)) return "This file type is not allowed.";
-  return null;
-}
-
-/** Browser may report an empty MIME for some extensions; fall back by extension. */
-function resolveMime(file: File): string {
-  if (file.type) return file.type;
-  const ext = file.name.split(".").pop()?.toLowerCase();
-  const map: Record<string, string> = {
-    pdf: "application/pdf",
-    doc: "application/msword",
-    docx: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-    xls: "application/vnd.ms-excel",
-    xlsx: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-    ppt: "application/vnd.ms-powerpoint",
-    pptx: "application/vnd.openxmlformats-officedocument.presentationml.presentation",
-    txt: "text/plain",
-    csv: "text/csv",
-    png: "image/png",
-    jpg: "image/jpeg",
-    jpeg: "image/jpeg",
-    webp: "image/webp",
-    gif: "image/gif",
-  };
-  return (ext && map[ext]) || "application/octet-stream";
-}
-
 /**
- * Reusable drag-and-drop uploader.
- *
- * Flow per file: server action issues a signed upload URL (after checking
- * permission + entity access) → browser uploads directly to Storage with
- * progress → server action records metadata. The service-role key is never
- * involved; storage RLS applies to the upload itself.
+ * Drag-and-drop uploader for an existing record.
+ * Issues a signed URL, PUTs the file to Storage, then writes metadata.
  */
 export function FileUpload({
   module,
@@ -87,51 +50,9 @@ export function FileUpload({
   const uploadOne = useCallback(
     async (item: QueuedFile) => {
       update(item.id, { status: "uploading", progress: 5 });
-      const mimeType = resolveMime(item.file);
-
-      const req = await requestUploadAction({
-        module,
-        entityId,
-        fileName: item.file.name,
-        mimeType,
-        fileSize: item.file.size,
-      });
-      if (!req.ok) {
-        update(item.id, { status: "error", error: req.fieldErrors ? Object.values(req.fieldErrors).flat()[0] ?? req.error : req.error });
-        return false;
-      }
-
-      // Upload with progress via XHR against the signed URL (supabase-js uploadToSignedUrl has no progress callback).
-      const ok = await new Promise<boolean>((resolve) => {
-        const xhr = new XMLHttpRequest();
-        xhr.open("PUT", req.data.signedUrl, true);
-        xhr.setRequestHeader("Content-Type", mimeType);
-        xhr.setRequestHeader("x-upsert", "false");
-        xhr.upload.onprogress = (e) => {
-          if (e.lengthComputable) update(item.id, { progress: Math.max(5, Math.round((e.loaded / e.total) * 90)) });
-        };
-        xhr.onload = () => resolve(xhr.status >= 200 && xhr.status < 300);
-        xhr.onerror = () => resolve(false);
-        xhr.send(item.file);
-      });
-
-      if (!ok) {
-        update(item.id, { status: "error", error: "Upload to storage failed. Please retry." });
-        return false;
-      }
-
-      const fin = await finalizeUploadAction({
-        module,
-        entityId,
-        storagePath: req.data.storagePath,
-        fileName: item.file.name,
-        mimeType,
-        fileSize: item.file.size,
-      });
-      if (!fin.ok) {
-        // Best-effort cleanup of the orphaned object.
-        void createClient().storage.from(DOCUMENTS_BUCKET).remove([req.data.storagePath]);
-        update(item.id, { status: "error", error: fin.error });
+      const error = await uploadFileToEntity(module, entityId, item.file, (pct) => update(item.id, { progress: pct }));
+      if (error) {
+        update(item.id, { status: "error", error });
         return false;
       }
       update(item.id, { status: "done", progress: 100 });
@@ -176,7 +97,7 @@ export function FileUpload({
       <div
         role="button"
         tabIndex={0}
-        aria-label="Upload files"
+        aria-label="Attach files"
         onClick={() => inputRef.current?.click()}
         onKeyDown={(e) => (e.key === "Enter" || e.key === " ") && inputRef.current?.click()}
         onDragOver={(e) => {
@@ -186,14 +107,16 @@ export function FileUpload({
         onDragLeave={() => setDragging(false)}
         onDrop={onDrop}
         className={cn(
-          "flex cursor-pointer flex-col items-center justify-center gap-1.5 rounded-xl border-2 border-dashed text-center transition-colors",
+          "flex cursor-pointer flex-col items-center justify-center gap-1.5 rounded-lg border-2 border-dashed text-center transition-colors",
           compact ? "px-4 py-4" : "px-6 py-8",
           dragging ? "border-brand bg-brand/5" : "border-border hover:border-brand/50 hover:bg-muted/40",
         )}
       >
-        <UploadCloudIcon className={cn("text-brand", compact ? "size-5" : "size-7")} />
+        {compact ? <PaperclipIcon className="size-5 text-brand" /> : <UploadCloudIcon className="size-7 text-brand" />}
         <p className="text-sm font-medium">
-          Drop files here or <span className="text-brand underline">browse</span>
+          {compact ? "Attach file" : "Drop files here or "}
+          {compact ? null : <span className="text-brand underline">browse</span>}
+          {compact ? <span className="text-muted-foreground"> — drop or browse</span> : null}
         </p>
         <p className="text-xs text-muted-foreground">
           PDF, Office, images, text · up to {formatBytes(MAX_FILE_SIZE_BYTES)} each

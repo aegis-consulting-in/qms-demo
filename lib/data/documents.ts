@@ -27,6 +27,19 @@ export async function getDocument(id: string) {
 }
 
 /**
+ * File counts per module for the home folder strip. One query instead of a
+ * full folder listing per shortcut.
+ */
+export async function getHomeFolderCounts() {
+  const supabase = await createClient();
+  const { data, error } = await supabase.from("documents").select("module");
+  if (error) throw error;
+  const counts: Record<string, number> = {};
+  for (const row of data ?? []) counts[row.module] = (counts[row.module] ?? 0) + 1;
+  return counts;
+}
+
+/**
  * Entities within a module that have at least one document the caller can
  * see, with counts. Used by the folder shortcut pages.
  */

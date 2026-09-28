@@ -1,10 +1,14 @@
 "use client";
 
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Loader2Icon } from "lucide-react";
+import { toast } from "sonner";
 import type { z } from "zod";
+import { AttachFilesField } from "@/components/documents/attach-files-field";
+import { FileUpload } from "@/components/documents/file-upload";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
@@ -12,6 +16,7 @@ import { NativeSelect } from "@/components/ui/native-select";
 import { Textarea } from "@/components/ui/textarea";
 import { FormError, FormField, FormGrid } from "@/components/ui/form-field";
 import { createSupplierAction, updateSupplierAction } from "@/lib/actions/suppliers";
+import { uploadFilesToEntity } from "@/lib/documents/upload-client";
 import { useAction } from "@/lib/hooks/use-action";
 import { humanize } from "@/lib/format";
 import type { SupplierRow } from "@/lib/types/database";
@@ -30,6 +35,7 @@ export function SupplierForm({
 }) {
   const router = useRouter();
   const isEdit = Boolean(supplier);
+  const [pendingFiles, setPendingFiles] = useState<File[]>([]);
   const form = useForm<Values>({
     resolver: zodResolver(supplierSchema),
     defaultValues: {
@@ -50,7 +56,14 @@ export function SupplierForm({
     },
   });
   const { run, isPending, error, fieldErrors } = useAction(
-    async (values: Values) => (isEdit ? updateSupplierAction({ id: supplier!.id, ...values }) : createSupplierAction(values)),
+    async (values: Values) => {
+      const result = isEdit ? await updateSupplierAction({ id: supplier!.id, ...values }) : await createSupplierAction(values);
+      if (result.ok && pendingFiles.length) {
+        const uploaded = await uploadFilesToEntity("supplier", result.data.id, pendingFiles);
+        if (uploaded.ok) toast.success(uploaded.ok === 1 ? "File attached." : `${uploaded.ok} files attached.`);
+      }
+      return result;
+    },
     { successMessage: isEdit ? "Supplier updated." : "Supplier created.", onSuccess: (d) => router.push(`/suppliers/${d.id}`) },
   );
   const err = (k: keyof Values) => form.formState.errors[k]?.message ?? fieldErrors[k];
@@ -123,6 +136,11 @@ export function SupplierForm({
       <FormField label="Notes" htmlFor="notes" error={err("notes")}>
         <Textarea id="notes" rows={3} {...form.register("notes")} />
       </FormField>
+      {isEdit && supplier ? (
+        <FileUpload module="supplier" entityId={supplier.id} compact />
+      ) : (
+        <AttachFilesField files={pendingFiles} onChange={setPendingFiles} disabled={isPending} />
+      )}
       <div className="flex items-center gap-2">
         <Button type="submit" disabled={isPending}>
           {isPending ? <Loader2Icon className="animate-spin" /> : null}

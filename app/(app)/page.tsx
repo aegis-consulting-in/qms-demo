@@ -5,7 +5,7 @@ import { ModuleButton } from "@/components/layout/module-button";
 import { StatusBadge } from "@/components/shared/status-badge";
 import { requireUser } from "@/lib/auth/guards";
 import { PERMISSIONS } from "@/lib/auth/permissions";
-import { getModuleFolders } from "@/lib/data/documents";
+import { getHomeFolderCounts } from "@/lib/data/documents";
 import { getMyAssignments } from "@/lib/data/training";
 import { FOLDERS, MODULES } from "@/lib/navigation";
 import { formatDate, isOverdue } from "@/lib/format";
@@ -14,17 +14,10 @@ export default async function HomePage() {
   const user = await requireUser();
   const canSeeDocs = user.can(PERMISSIONS.documents.view);
 
-  const [folderCounts, myAssignments] = await Promise.all([
-    canSeeDocs
-      ? Promise.all(
-          FOLDERS.filter((f) => f.home).map(
-            async (f) => [f.key, (await getModuleFolders(f.key)).reduce((n, x) => n + x.count, 0)] as const,
-          ),
-        )
-      : Promise.resolve([]),
+  const [counts, myAssignments] = await Promise.all([
+    canSeeDocs ? getHomeFolderCounts() : Promise.resolve({} as Record<string, number>),
     user.employee ? getMyAssignments(user.employee.id) : Promise.resolve([]),
   ]);
-  const counts = Object.fromEntries(folderCounts) as Record<string, number>;
 
   const modules = MODULES.filter((m) => m.permissions.length === 0 || user.canAny(m.permissions));
   const attention = myAssignments.filter(

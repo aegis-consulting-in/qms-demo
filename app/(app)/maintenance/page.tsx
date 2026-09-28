@@ -12,7 +12,7 @@ import { BooleanBadge, StatusBadge } from "@/components/shared/status-badge";
 import { requirePagePermission } from "@/lib/auth/guards";
 import { PERMISSIONS } from "@/lib/auth/permissions";
 import { getDepartments } from "@/lib/data/master";
-import { getMaintenanceStats, listAssets, listMaintenanceRecords } from "@/lib/data/maintenance";
+import { getAssetOptions, getMaintenanceStats, listAssets, listMaintenanceRecords } from "@/lib/data/maintenance";
 import { formatDate, fullName, humanize, isOverdue } from "@/lib/format";
 import { paginationSchema } from "@/lib/validation/common";
 import { MAINTENANCE_STATUSES, MAINTENANCE_TYPES } from "@/lib/validation/maintenance";
@@ -30,11 +30,12 @@ export default async function MaintenancePage({ searchParams }: PageProps<"/main
   const assetStatus = (typeof params.assetStatus === "string" ? params.assetStatus : "active") as "active" | "inactive" | "all";
   const departmentId = typeof params.department === "string" ? params.department : undefined;
 
-  const [stats, departments, records, assets] = await Promise.all([
+  const [stats, departments, records, assets, assetOptions] = await Promise.all([
     getMaintenanceStats(),
     getDepartments(),
     tab === "records" ? listMaintenanceRecords({ ...filters, status, type, assetId }) : Promise.resolve({ rows: [], total: 0 }),
-    tab === "assets" ? listAssets({ ...filters, departmentId, status: assetStatus }) : listAssets({ page: 1, pageSize: 200, q: "", dir: "asc" }),
+    tab === "assets" ? listAssets({ ...filters, departmentId, status: assetStatus }) : Promise.resolve({ rows: [], total: 0 }),
+    tab === "records" ? getAssetOptions() : Promise.resolve([]),
   ]);
 
   type RecordRow = (typeof records.rows)[number];
@@ -136,11 +137,11 @@ export default async function MaintenancePage({ searchParams }: PageProps<"/main
               <SearchInput placeholder="Search records…" className="w-full sm:w-72" />
               <FilterSelect param="status" placeholder="All statuses" options={MAINTENANCE_STATUSES.map((s) => ({ value: s, label: humanize(s) }))} ariaLabel="Status" />
               <FilterSelect param="type" placeholder="All types" options={MAINTENANCE_TYPES.map((t) => ({ value: t, label: humanize(t) }))} ariaLabel="Type" />
-              {assets.rows.length ? (
+              {assetOptions.length ? (
                 <FilterSelect
                   param="asset"
                   placeholder="All assets"
-                  options={assets.rows.map((a) => ({ value: a.id, label: `${a.asset_code} · ${a.name}` }))}
+                  options={assetOptions.map((a) => ({ value: a.id, label: `${a.asset_code} · ${a.name}` }))}
                   ariaLabel="Asset"
                 />
               ) : null}

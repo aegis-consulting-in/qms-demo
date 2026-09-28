@@ -44,12 +44,8 @@ export async function loginAction(_prev: ActionResult | null, formData: FormData
     return fail("This account has been deactivated. Contact your administrator.");
   }
 
-  try {
-    await supabase.from("profiles").update({ last_login_at: new Date().toISOString() }).eq("id", data.user.id);
-    await logAction(supabase, "auth.login", { type: "user", id: data.user.id });
-  } catch {
-    // Sign-in must succeed even if the stamp or audit write fails.
-  }
+  void supabase.from("profiles").update({ last_login_at: new Date().toISOString() }).eq("id", data.user.id);
+  void logAction(supabase, "auth.login", { type: "user", id: data.user.id });
 
   redirect(profile?.must_change_password ? "/profile/change-password?forced=1" : safeNext(parsed.data.next));
 }

@@ -1,6 +1,6 @@
 "use server";
 
-import { revalidatePath, revalidateTag } from "next/cache";
+import { revalidatePath, updateTag } from "next/cache";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
 import { logAction } from "@/lib/audit-log";
@@ -369,7 +369,7 @@ export async function saveSystemSettingsAction(input: unknown): Promise<ActionRe
     const { error } = await supabase.from("system_settings").upsert(rows, { onConflict: "key" });
     if (error) throw error;
     await logAction(supabase, "admin.settings_saved", { type: "system_settings", id: null }, { keys: rows.map((r) => r.key) });
-    revalidateTag("system-settings");
+    updateTag("system-settings");
     revalidatePath("/", "layout");
     return undefined;
   });

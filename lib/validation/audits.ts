@@ -2,6 +2,7 @@ import { z } from "zod";
 import { optionalDate, optionalText, optionalUuid, requiredText, uuid } from "./common";
 
 export const AUDIT_STATUSES = ["planned", "in_progress", "completed", "closed"] as const;
+export const AUDIT_TYPES = ["internal", "external"] as const;
 export const FINDING_SEVERITIES = ["observation", "minor", "major", "critical"] as const;
 export const FINDING_STATUSES = ["open", "in_progress", "closed"] as const;
 export const CORRECTIVE_ACTION_STATUSES = ["open", "in_progress", "completed", "verified", "cancelled"] as const;
@@ -13,6 +14,7 @@ export const auditSchema = z.object({
   departmentId: optionalUuid,
   auditorId: optionalUuid,
   auditDate: optionalDate,
+  auditType: z.enum(AUDIT_TYPES).default("internal"),
   status: z.enum(AUDIT_STATUSES).default("planned"),
   responsibility: optionalText(500),
   applicableClauses: optionalText(500),

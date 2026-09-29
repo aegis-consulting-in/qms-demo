@@ -25,6 +25,7 @@ function toRow(input: AuditInput) {
     department_id: input.departmentId ?? null,
     auditor_id: input.auditorId ?? null,
     audit_date: input.auditDate ?? null,
+    audit_type: input.auditType,
     status: input.status,
     responsibility: input.responsibility ?? null,
     applicable_clauses: input.applicableClauses ?? null,

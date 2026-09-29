@@ -41,6 +41,9 @@ const STATUS_TONES: Record<string, Tone> = {
   minor: "info",
   major: "warning",
   critical: "danger",
+  // audit type
+  internal: "info",
+  external: "warning",
   // priority
   low: "muted",
   medium: "info",

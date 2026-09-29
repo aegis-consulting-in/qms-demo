@@ -14,7 +14,7 @@ import { getAuditStats, listAudits } from "@/lib/data/audits";
 import { getDepartments } from "@/lib/data/master";
 import { formatDate, fullName, humanize } from "@/lib/format";
 import { paginationSchema } from "@/lib/validation/common";
-import { AUDIT_STATUSES } from "@/lib/validation/audits";
+import { AUDIT_STATUSES, AUDIT_TYPES } from "@/lib/validation/audits";
 
 export const metadata: Metadata = { title: "Audits" };
 
@@ -24,9 +24,10 @@ export default async function AuditsPage({ searchParams }: PageProps<"/audits">)
   const filters = paginationSchema.parse(params);
   const status = typeof params.status === "string" ? params.status : undefined;
   const departmentId = typeof params.department === "string" ? params.department : undefined;
+  const auditType = typeof params.type === "string" ? params.type : undefined;
 
   const [{ rows, total }, stats, departments] = await Promise.all([
-    listAudits({ ...filters, status, departmentId }),
+    listAudits({ ...filters, status, departmentId, auditType }),
     getAuditStats(),
     getDepartments(),
   ]);
@@ -45,6 +46,7 @@ export default async function AuditsPage({ searchParams }: PageProps<"/audits">)
         </div>
       ),
     },
+    { key: "type", header: "Type", cell: (a) => <StatusBadge status={a.audit_type} />, hideBelow: "md" },
     { key: "department", header: "Department", cell: (a) => a.department?.name ?? "—", hideBelow: "md" },
     { key: "auditor", header: "Auditor", cell: (a) => fullName(a.auditor), hideBelow: "lg" },
     { key: "date", header: "Date", cell: (a) => formatDate(a.audit_date), hideBelow: "sm" },
@@ -76,6 +78,7 @@ export default async function AuditsPage({ searchParams }: PageProps<"/audits">)
           <ListToolbar>
             <SearchInput placeholder="Search audits…" className="w-full sm:w-72" />
             <FilterSelect param="status" placeholder="All statuses" options={AUDIT_STATUSES.map((s) => ({ value: s, label: humanize(s) }))} ariaLabel="Status" />
+            <FilterSelect param="type" placeholder="All types" options={AUDIT_TYPES.map((t) => ({ value: t, label: humanize(t) }))} ariaLabel="Audit type" />
             <FilterSelect param="department" placeholder="All departments" options={departments.map((d) => ({ value: d.id, label: d.name }))} ariaLabel="Department" />
             <SortSelect
               options={[
@@ -85,7 +88,7 @@ export default async function AuditsPage({ searchParams }: PageProps<"/audits">)
                 { value: "status", label: "Status" },
               ]}
             />
-            <ClearFilters keys={["q", "status", "department", "sort", "dir"]} />
+            <ClearFilters keys={["q", "status", "type", "department", "sort", "dir"]} />
           </ListToolbar>
           <DataTable columns={columns} rows={rows} rowKey={(r) => r.id} emptyTitle="No audits found" />
           <Pagination page={filters.page} pageSize={filters.pageSize} total={total} />

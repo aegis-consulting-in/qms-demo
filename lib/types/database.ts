@@ -28,6 +28,8 @@ export type SupplierStatus = "active" | "inactive" | "probationary" | "blacklist
 export type MaintenanceStatus = "scheduled" | "due" | "in_progress" | "completed" | "overdue" | "cancelled";
 export type MaintenanceType = "preventive" | "corrective" | "calibration" | "inspection";
 export type AuditStatus = "planned" | "in_progress" | "completed" | "closed";
+export type AuditType = "internal" | "external";
+export type MilestoneStatus = "planned" | "in_progress" | "completed" | "cancelled";
 export type FindingSeverity = "observation" | "minor" | "major" | "critical";
 export type FindingStatus = "open" | "in_progress" | "closed";
 export type CorrectiveActionStatus = "open" | "in_progress" | "completed" | "verified" | "cancelled";
@@ -155,6 +157,17 @@ export type ProjectMemberRow = {
   added_at: string;
 };
 
+export type ProjectMilestoneRow = Timestamps & {
+  id: string;
+  project_id: string;
+  name: string;
+  start_date: string | null;
+  end_date: string | null;
+  status: MilestoneStatus;
+  sort_order: number;
+  created_by: string | null;
+};
+
 export type SupplierRow = Timestamps & {
   id: string;
   code: string;
@@ -214,6 +227,7 @@ export type AuditRow = Timestamps & {
   department_id: string | null;
   auditor_id: string | null;
   audit_date: string | null;
+  audit_type: AuditType;
   status: AuditStatus;
   responsibility: string | null;
   applicable_clauses: string | null;
@@ -392,6 +406,7 @@ export type Database = {
         >,
         [
           { foreignKeyName: "projects_manager_id_fkey"; columns: ["manager_id"]; isOneToOne: false; referencedRelation: "employees"; referencedColumns: ["id"] },
+          { foreignKeyName: "project_milestones_project_id_fkey"; columns: ["id"]; isOneToOne: false; referencedRelation: "project_milestones"; referencedColumns: ["project_id"] },
         ]
       >;
       project_members: Table<
@@ -401,6 +416,11 @@ export type Database = {
           { foreignKeyName: "project_members_project_id_fkey"; columns: ["project_id"]; isOneToOne: false; referencedRelation: "projects"; referencedColumns: ["id"] },
           { foreignKeyName: "project_members_employee_id_fkey"; columns: ["employee_id"]; isOneToOne: false; referencedRelation: "employees"; referencedColumns: ["id"] },
         ]
+      >;
+      project_milestones: Table<
+        ProjectMilestoneRow,
+        Optional<ProjectMilestoneRow, Generated | "start_date" | "end_date" | "status" | "sort_order" | "created_by">,
+        [{ foreignKeyName: "project_milestones_project_id_fkey"; columns: ["project_id"]; isOneToOne: false; referencedRelation: "projects"; referencedColumns: ["id"] }]
       >;
       suppliers: Table<
         SupplierRow,
@@ -475,6 +495,7 @@ export type Database = {
           | "department_id"
           | "auditor_id"
           | "audit_date"
+          | "audit_type"
           | "status"
           | "responsibility"
           | "applicable_clauses"
@@ -550,6 +571,8 @@ export type Database = {
       maintenance_status: MaintenanceStatus;
       maintenance_type: MaintenanceType;
       audit_status: AuditStatus;
+      audit_type: AuditType;
+      milestone_status: MilestoneStatus;
       finding_severity: FindingSeverity;
       finding_status: FindingStatus;
       corrective_action_status: CorrectiveActionStatus;

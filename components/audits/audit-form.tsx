@@ -14,7 +14,7 @@ import { createAuditAction, updateAuditAction } from "@/lib/actions/audits";
 import { useAction } from "@/lib/hooks/use-action";
 import { humanize } from "@/lib/format";
 import type { AuditRow } from "@/lib/types/database";
-import { AUDIT_STATUSES, auditSchema } from "@/lib/validation/audits";
+import { AUDIT_STATUSES, AUDIT_TYPES, auditSchema } from "@/lib/validation/audits";
 
 type Values = z.input<typeof auditSchema>;
 
@@ -38,6 +38,7 @@ export function AuditForm({
       departmentId: audit?.department_id ?? "",
       auditorId: audit?.auditor_id ?? "",
       auditDate: audit?.audit_date ?? "",
+      auditType: audit?.audit_type ?? "internal",
       status: audit?.status ?? "planned",
       responsibility: audit?.responsibility ?? "",
       applicableClauses: audit?.applicable_clauses ?? "",
@@ -79,6 +80,15 @@ export function AuditForm({
         </FormField>
         <FormField label="Audit date" htmlFor="auditDate" error={err("auditDate")}>
           <Input id="auditDate" type="date" {...form.register("auditDate")} />
+        </FormField>
+        <FormField label="Audit type" htmlFor="auditType" error={err("auditType")}>
+          <NativeSelect id="auditType" {...form.register("auditType")}>
+            {AUDIT_TYPES.map((t) => (
+              <option key={t} value={t}>
+                {humanize(t)}
+              </option>
+            ))}
+          </NativeSelect>
         </FormField>
         <FormField label="Department" htmlFor="departmentId" error={err("departmentId")}>
           <NativeSelect id="departmentId" {...form.register("departmentId")}>

@@ -1,11 +1,17 @@
 import "server-only";
 
 import { createClient } from "@/lib/supabase/server";
+import { many } from "@/lib/data/helpers";
 import type { PaginationInput } from "@/lib/validation/common";
 
-export const PROJECT_SELECT = `
+export const PROJECT_LIST_SELECT = `
   *,
   manager:employees!manager_id(id, first_name, last_name, email)
+` as const;
+
+export const PROJECT_SELECT = `
+  ${PROJECT_LIST_SELECT},
+  milestones:project_milestones(id, name, start_date, end_date, status, sort_order)
 ` as const;
 
 export type ProjectListFilters = PaginationInput & { status?: string; priority?: string };
@@ -15,7 +21,7 @@ export async function listProjects(filters: ProjectListFilters) {
   const from = (filters.page - 1) * filters.pageSize;
   const to = from + filters.pageSize - 1;
 
-  let q = supabase.from("projects").select(PROJECT_SELECT, { count: "exact" }).is("deleted_at", null);
+  let q = supabase.from("projects").select(PROJECT_LIST_SELECT, { count: "exact" }).is("deleted_at", null);
   if (filters.q) {
     const term = `%${filters.q.replace(/[%_]/g, "")}%`;
     q = q.or(`name.ilike.${term},code.ilike.${term},description.ilike.${term}`);
@@ -40,9 +46,12 @@ export async function getProject(id: string) {
     .select(PROJECT_SELECT)
     .eq("id", id)
     .is("deleted_at", null)
+    .order("sort_order", { referencedTable: "project_milestones", ascending: true })
     .maybeSingle();
   if (error) throw error;
-  return data;
+  if (!data) return data;
+  const milestones = many(data.milestones).sort((a, b) => a.sort_order - b.sort_order);
+  return { ...data, milestones };
 }
 
 export async function getProjectMembers(projectId: string) {

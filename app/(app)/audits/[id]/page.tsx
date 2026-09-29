@@ -37,6 +37,7 @@ export default async function AuditDetailPage({ params }: PageProps<"/audits/[id
         title={
           <span className="inline-flex flex-wrap items-center gap-2">
             {audit.title}
+            <StatusBadge status={audit.audit_type} />
             <StatusBadge status={audit.status} />
           </span>
         }
@@ -62,6 +63,7 @@ export default async function AuditDetailPage({ params }: PageProps<"/audits/[id
             items={[
               { label: "Department", value: audit.department?.name ?? "—" },
               { label: "Auditor", value: fullName(one(audit.auditor)) },
+              { label: "Audit type", value: <StatusBadge status={audit.audit_type} /> },
               { label: "Audit date", value: formatDate(audit.audit_date) },
               { label: "Responsibility", value: audit.responsibility ?? "—" },
               { label: "Applicable clauses", value: audit.applicable_clauses ?? "—" },

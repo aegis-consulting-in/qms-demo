@@ -21,7 +21,7 @@ export default async function EditProjectPage({ params }: PageProps<"/projects/[
     <div className="flex flex-col gap-5">
       <PageHeader title={`Edit ${project.name}`} crumbs={[{ label: "Projects", href: "/projects" }, { label: project.name, href: `/projects/${project.id}` }, { label: "Edit" }]} />
       <Section>
-        <ProjectForm project={project} employees={employees} />
+        <ProjectForm project={project} employees={employees} milestones={project.milestones ?? []} />
       </Section>
     </div>
   );

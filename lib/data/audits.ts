@@ -9,7 +9,7 @@ export const AUDIT_SELECT = `
   auditor:employees!auditor_id(id, first_name, last_name, email)
 ` as const;
 
-export async function listAudits(filters: PaginationInput & { status?: string; departmentId?: string }) {
+export async function listAudits(filters: PaginationInput & { status?: string; departmentId?: string; auditType?: string }) {
   const supabase = await createClient();
   const from = (filters.page - 1) * filters.pageSize;
   const to = from + filters.pageSize - 1;
@@ -21,6 +21,7 @@ export async function listAudits(filters: PaginationInput & { status?: string; d
   }
   if (filters.status) q = q.eq("status", filters.status as never);
   if (filters.departmentId) q = q.eq("department_id", filters.departmentId);
+  if (filters.auditType) q = q.eq("audit_type", filters.auditType as never);
 
   const sortCol = ({ date: "audit_date", title: "title", code: "code", status: "status" } as Record<string, string>)[
     filters.sort ?? "date"

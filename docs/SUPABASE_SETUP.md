@@ -46,6 +46,7 @@ The schema, functions, RLS policies and storage policies are in:
 | `supabase/migrations/20260928000001_schema.sql` | Tables, indexes, triggers, enums |
 | `supabase/migrations/20260928000002_functions_rls.sql` | Permission helpers and Row Level Security |
 | `supabase/migrations/20260928000003_storage.sql` | Private `documents` bucket and storage policies |
+| `supabase/migrations/20260928000004_milestones_and_audit_type.sql` | Project milestones and audit Internal/External type |
 | `supabase/seed.sql` | Permissions, roles, role grants, departments, job titles, training levels/statuses, system settings |
 
 ### Option A — SQL editor (no CLI)
@@ -54,7 +55,8 @@ The schema, functions, RLS policies and storage policies are in:
 2. Paste and **Run** `20260928000001_schema.sql`.
 3. Paste and **Run** `20260928000002_functions_rls.sql`.
 4. Paste and **Run** `20260928000003_storage.sql`.
-5. Paste and **Run** `supabase/seed.sql`.
+5. Paste and **Run** `20260928000004_milestones_and_audit_type.sql`.
+6. Paste and **Run** `supabase/seed.sql`.
 
 Run them in that order. If a statement says a type or table already exists, you can ignore that run or start from a fresh project.
 

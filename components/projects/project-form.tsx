@@ -1,9 +1,9 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useForm } from "react-hook-form";
+import { useFieldArray, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Loader2Icon } from "lucide-react";
+import { Loader2Icon, PlusIcon, Trash2Icon } from "lucide-react";
 import type { z } from "zod";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -13,17 +13,26 @@ import { FormError, FormField, FormGrid } from "@/components/ui/form-field";
 import { createProjectAction, updateProjectAction } from "@/lib/actions/projects";
 import { useAction } from "@/lib/hooks/use-action";
 import { humanize } from "@/lib/format";
-import type { ProjectRow } from "@/lib/types/database";
-import { PROJECT_PRIORITIES, PROJECT_STATUSES, projectSchema } from "@/lib/validation/projects";
+import type { ProjectMilestoneRow, ProjectRow } from "@/lib/types/database";
+import {
+  MILESTONE_STATUSES,
+  PROJECT_PRIORITIES,
+  PROJECT_STATUSES,
+  projectSchema,
+} from "@/lib/validation/projects";
 
 type Values = z.input<typeof projectSchema>;
+
+const emptyMilestone = { id: "", name: "", startDate: "", endDate: "", status: "planned" as const };
 
 export function ProjectForm({
   project,
   employees,
+  milestones = [],
 }: {
   project?: ProjectRow;
   employees: { id: string; first_name: string; last_name: string; employee_code: string }[];
+  milestones?: Pick<ProjectMilestoneRow, "id" | "name" | "start_date" | "end_date" | "status">[];
 }) {
   const router = useRouter();
   const isEdit = Boolean(project);
@@ -34,19 +43,36 @@ export function ProjectForm({
       name: project?.name ?? "",
       description: project?.description ?? "",
       managerId: project?.manager_id ?? "",
-      startDate: project?.start_date ?? "",
-      expectedEndDate: project?.expected_end_date ?? "",
       actualEndDate: project?.actual_end_date ?? "",
       status: project?.status ?? "planning",
       priority: project?.priority ?? "medium",
       notes: project?.notes ?? "",
+      milestones:
+        milestones.length > 0
+          ? milestones.map((m) => ({
+              id: m.id,
+              name: m.name,
+              startDate: m.start_date ?? "",
+              endDate: m.end_date ?? "",
+              status: m.status,
+            }))
+          : [emptyMilestone],
     },
   });
+  const { fields, append, remove } = useFieldArray({ control: form.control, name: "milestones" });
   const { run, isPending, error, fieldErrors } = useAction(
     async (values: Values) => (isEdit ? updateProjectAction({ id: project!.id, ...values }) : createProjectAction(values)),
     { successMessage: isEdit ? "Project updated." : "Project created.", onSuccess: (d) => router.push(`/projects/${d.id}`) },
   );
-  const err = (k: keyof Values) => form.formState.errors[k]?.message ?? fieldErrors[k];
+  const err = (k: string) => {
+    const fromForm = k.split(".").reduce<unknown>((acc, part) => {
+      if (acc && typeof acc === "object" && part in acc) return (acc as Record<string, unknown>)[part];
+      return undefined;
+    }, form.formState.errors);
+    const message =
+      fromForm && typeof fromForm === "object" && "message" in fromForm ? String((fromForm as { message?: string }).message ?? "") : "";
+    return message || fieldErrors[k]?.[0];
+  };
 
   return (
     <form onSubmit={form.handleSubmit((v) => run(v))} className="flex flex-col gap-5" noValidate>
@@ -88,16 +114,76 @@ export function ProjectForm({
             </NativeSelect>
           </FormField>
         </div>
-        <FormField label="Start date" htmlFor="startDate" error={err("startDate")}>
-          <Input id="startDate" type="date" {...form.register("startDate")} />
-        </FormField>
-        <FormField label="Expected end date" htmlFor="expectedEndDate" error={err("expectedEndDate")}>
-          <Input id="expectedEndDate" type="date" {...form.register("expectedEndDate")} />
-        </FormField>
-        <FormField label="Actual end date" htmlFor="actualEndDate" error={err("actualEndDate")}>
+        <FormField
+          label="Actual end date"
+          htmlFor="actualEndDate"
+          error={err("actualEndDate")}
+          hint="Overall project close-out. Milestone dates are below."
+        >
           <Input id="actualEndDate" type="date" {...form.register("actualEndDate")} />
         </FormField>
       </FormGrid>
+
+      <div className="flex flex-col gap-3">
+        <div className="flex items-end justify-between gap-3">
+          <div>
+            <h2 className="text-sm font-medium">Milestones</h2>
+            <p className="text-xs text-muted-foreground">Start and end dates belong to each milestone, not the project header.</p>
+          </div>
+          <Button type="button" variant="outline" size="sm" onClick={() => append(emptyMilestone)}>
+            <PlusIcon />
+            Add milestone
+          </Button>
+        </div>
+        {fields.map((field, index) => (
+          <div key={field.id} className="rounded-lg border bg-card p-3">
+            <input type="hidden" {...form.register(`milestones.${index}.id`)} />
+            <FormGrid>
+              <FormField
+                label="Milestone"
+                htmlFor={`milestone-name-${index}`}
+                required
+                error={err(`milestones.${index}.name`)}
+                className="md:col-span-2"
+              >
+                <Input
+                  id={`milestone-name-${index}`}
+                  placeholder="e.g. Design freeze, FAT, Go-live"
+                  {...form.register(`milestones.${index}.name`)}
+                />
+              </FormField>
+              <FormField label="Start date" htmlFor={`milestone-start-${index}`} error={err(`milestones.${index}.startDate`)}>
+                <Input id={`milestone-start-${index}`} type="date" {...form.register(`milestones.${index}.startDate`)} />
+              </FormField>
+              <FormField label="End date" htmlFor={`milestone-end-${index}`} error={err(`milestones.${index}.endDate`)}>
+                <Input id={`milestone-end-${index}`} type="date" {...form.register(`milestones.${index}.endDate`)} />
+              </FormField>
+              <FormField label="Status" htmlFor={`milestone-status-${index}`} error={err(`milestones.${index}.status`)}>
+                <NativeSelect id={`milestone-status-${index}`} {...form.register(`milestones.${index}.status`)}>
+                  {MILESTONE_STATUSES.map((s) => (
+                    <option key={s} value={s}>
+                      {humanize(s)}
+                    </option>
+                  ))}
+                </NativeSelect>
+              </FormField>
+              <div className="flex items-end">
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  disabled={fields.length <= 1}
+                  onClick={() => remove(index)}
+                >
+                  <Trash2Icon />
+                  Remove
+                </Button>
+              </div>
+            </FormGrid>
+          </div>
+        ))}
+      </div>
+
       <FormField label="Description" htmlFor="description" error={err("description")}>
         <Textarea id="description" rows={4} {...form.register("description")} />
       </FormField>

@@ -315,6 +315,30 @@ async function seed() {
     { onConflict: "project_id,employee_id" },
   );
 
+  const existingMilestones = await admin.from("project_milestones").select("id").eq("project_id", project.id).limit(1);
+  if (!existingMilestones.data?.length) {
+    await admin.from("project_milestones").insert([
+      {
+        project_id: project.id,
+        name: "PLC replacement",
+        start_date: "2026-07-01",
+        end_date: "2026-09-30",
+        status: "in_progress",
+        sort_order: 0,
+        created_by: users.projects,
+      },
+      {
+        project_id: project.id,
+        name: "Process revalidation",
+        start_date: "2026-10-01",
+        end_date: "2026-12-15",
+        status: "planned",
+        sort_order: 1,
+        created_by: users.projects,
+      },
+    ]);
+  }
+
   await admin.from("suppliers").upsert(
     {
       code: "SUP-ACME",
@@ -385,6 +409,7 @@ async function seed() {
           department_id: departments.Production,
           auditor_id: emp.auditor,
           audit_date: "2026-09-18",
+          audit_type: "internal",
           status: "in_progress",
           responsibility: "Production Supervisor",
           applicable_clauses: "ISO 9001 7.2, 8.5.1",

@@ -388,6 +388,7 @@ async function seed() {
       title: "Quarterly calibration",
       description: "Verify fill volume and torque settings.",
       maintenance_type: "calibration",
+      source: "internal",
       frequency: "quarterly",
       scheduled_date: "2026-09-01",
       due_date: "2026-09-30",

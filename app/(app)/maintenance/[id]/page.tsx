@@ -29,6 +29,7 @@ export default async function MaintenanceRecordPage({ params }: PageProps<"/main
         title={
           <span className="inline-flex flex-wrap items-center gap-2">
             {record.title}
+            <StatusBadge status={record.source} />
             <StatusBadge status={record.status} />
           </span>
         }
@@ -56,6 +57,7 @@ export default async function MaintenanceRecordPage({ params }: PageProps<"/main
               { label: "Asset", value: record.asset ? `${record.asset.asset_code} · ${record.asset.name}` : "—" },
               { label: "Location", value: record.asset?.location ?? "—" },
               { label: "Type", value: humanize(record.maintenance_type) },
+              { label: "Source", value: <StatusBadge status={record.source} /> },
               { label: "Frequency", value: humanize(record.frequency) },
               { label: "Assigned technician", value: fullName(record.assignee) },
               { label: "Notes", value: record.notes ?? "—" },

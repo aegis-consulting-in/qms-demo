@@ -36,6 +36,7 @@ function recordToRow(input: MaintenanceRecordInput) {
     title: input.title,
     description: input.description ?? null,
     maintenance_type: input.maintenanceType,
+    source: input.source,
     frequency: input.frequency ?? null,
     scheduled_date: input.scheduledDate ?? null,
     due_date: input.dueDate ?? null,

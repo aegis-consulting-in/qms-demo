@@ -15,7 +15,7 @@ import { getDepartments } from "@/lib/data/master";
 import { getAssetOptions, getMaintenanceStats, listAssets, listMaintenanceRecords } from "@/lib/data/maintenance";
 import { formatDate, fullName, humanize, isOverdue } from "@/lib/format";
 import { paginationSchema } from "@/lib/validation/common";
-import { MAINTENANCE_STATUSES, MAINTENANCE_TYPES } from "@/lib/validation/maintenance";
+import { MAINTENANCE_SOURCES, MAINTENANCE_STATUSES, MAINTENANCE_TYPES } from "@/lib/validation/maintenance";
 
 export const metadata: Metadata = { title: "Preventive Maintenance" };
 
@@ -25,6 +25,7 @@ export default async function MaintenancePage({ searchParams }: PageProps<"/main
   const filters = paginationSchema.parse(params);
   const status = typeof params.status === "string" ? params.status : undefined;
   const type = typeof params.type === "string" ? params.type : undefined;
+  const source = typeof params.source === "string" ? params.source : undefined;
   const assetId = typeof params.asset === "string" ? params.asset : undefined;
   const tab = params.tab === "assets" ? "assets" : "records";
   const assetStatus = (typeof params.assetStatus === "string" ? params.assetStatus : "active") as "active" | "inactive" | "all";
@@ -33,7 +34,7 @@ export default async function MaintenancePage({ searchParams }: PageProps<"/main
   const [stats, departments, records, assets, assetOptions] = await Promise.all([
     getMaintenanceStats(),
     getDepartments(),
-    tab === "records" ? listMaintenanceRecords({ ...filters, status, type, assetId }) : Promise.resolve({ rows: [], total: 0 }),
+    tab === "records" ? listMaintenanceRecords({ ...filters, status, type, source, assetId }) : Promise.resolve({ rows: [], total: 0 }),
     tab === "assets" ? listAssets({ ...filters, departmentId, status: assetStatus }) : Promise.resolve({ rows: [], total: 0 }),
     tab === "records" ? getAssetOptions() : Promise.resolve([]),
   ]);
@@ -55,6 +56,7 @@ export default async function MaintenancePage({ searchParams }: PageProps<"/main
       ),
     },
     { key: "type", header: "Type", cell: (r) => humanize(r.maintenance_type), hideBelow: "md" },
+    { key: "source", header: "Source", cell: (r) => <StatusBadge status={r.source} />, hideBelow: "md" },
     {
       key: "due",
       header: "Due",
@@ -137,6 +139,7 @@ export default async function MaintenancePage({ searchParams }: PageProps<"/main
               <SearchInput placeholder="Search records…" className="w-full sm:w-72" />
               <FilterSelect param="status" placeholder="All statuses" options={MAINTENANCE_STATUSES.map((s) => ({ value: s, label: humanize(s) }))} ariaLabel="Status" />
               <FilterSelect param="type" placeholder="All types" options={MAINTENANCE_TYPES.map((t) => ({ value: t, label: humanize(t) }))} ariaLabel="Type" />
+              <FilterSelect param="source" placeholder="All sources" options={MAINTENANCE_SOURCES.map((s) => ({ value: s, label: humanize(s) }))} ariaLabel="Source" />
               {assetOptions.length ? (
                 <FilterSelect
                   param="asset"
@@ -153,7 +156,7 @@ export default async function MaintenancePage({ searchParams }: PageProps<"/main
                   { value: "scheduled", label: "Scheduled" },
                 ]}
               />
-              <ClearFilters keys={["q", "status", "type", "asset", "sort", "dir"]} />
+              <ClearFilters keys={["q", "status", "type", "source", "asset", "sort", "dir"]} />
             </ListToolbar>
             <DataTable columns={recordColumns} rows={records.rows} rowKey={(r) => r.id} emptyTitle="No maintenance records" emptyDescription="Create an asset, then schedule a job." />
             <Pagination page={filters.page} pageSize={filters.pageSize} total={records.total} />

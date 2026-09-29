@@ -40,7 +40,7 @@ export async function getAsset(id: string) {
 }
 
 export async function listMaintenanceRecords(
-  filters: PaginationInput & { assetId?: string; status?: string; type?: string },
+  filters: PaginationInput & { assetId?: string; status?: string; type?: string; source?: string },
 ) {
   const supabase = await createClient();
   const from = (filters.page - 1) * filters.pageSize;
@@ -54,6 +54,7 @@ export async function listMaintenanceRecords(
   if (filters.assetId) q = q.eq("asset_id", filters.assetId);
   if (filters.status) q = q.eq("status", filters.status as never);
   if (filters.type) q = q.eq("maintenance_type", filters.type as never);
+  if (filters.source) q = q.eq("source", filters.source as never);
 
   const sortCol = ({ due: "due_date", title: "title", status: "status", scheduled: "scheduled_date" } as Record<string, string>)[
     filters.sort ?? "due"

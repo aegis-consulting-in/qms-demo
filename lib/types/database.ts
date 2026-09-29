@@ -27,6 +27,7 @@ export type ProjectPriority = "low" | "medium" | "high" | "critical";
 export type SupplierStatus = "active" | "inactive" | "probationary" | "blacklisted";
 export type MaintenanceStatus = "scheduled" | "due" | "in_progress" | "completed" | "overdue" | "cancelled";
 export type MaintenanceType = "preventive" | "corrective" | "calibration" | "inspection";
+export type MaintenanceSource = "internal" | "external";
 export type AuditStatus = "planned" | "in_progress" | "completed" | "closed";
 export type AuditType = "internal" | "external";
 export type MilestoneStatus = "planned" | "in_progress" | "completed" | "cancelled";
@@ -208,6 +209,7 @@ export type MaintenanceRecordRow = Timestamps & {
   title: string;
   description: string | null;
   maintenance_type: MaintenanceType;
+  source: MaintenanceSource;
   frequency: string | null;
   scheduled_date: string | null;
   due_date: string | null;
@@ -471,6 +473,7 @@ export type Database = {
           | Generated
           | "description"
           | "maintenance_type"
+          | "source"
           | "frequency"
           | "scheduled_date"
           | "due_date"
@@ -570,6 +573,7 @@ export type Database = {
       supplier_status: SupplierStatus;
       maintenance_status: MaintenanceStatus;
       maintenance_type: MaintenanceType;
+      maintenance_source: MaintenanceSource;
       audit_status: AuditStatus;
       audit_type: AuditType;
       milestone_status: MilestoneStatus;

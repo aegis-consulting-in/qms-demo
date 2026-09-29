@@ -3,6 +3,7 @@ import { checkbox, optionalDate, optionalText, optionalUuid, requiredText, uuid 
 
 export const MAINTENANCE_STATUSES = ["scheduled", "due", "in_progress", "completed", "overdue", "cancelled"] as const;
 export const MAINTENANCE_TYPES = ["preventive", "corrective", "calibration", "inspection"] as const;
+export const MAINTENANCE_SOURCES = ["internal", "external"] as const;
 export const MAINTENANCE_FREQUENCIES = ["daily", "weekly", "monthly", "quarterly", "half-yearly", "yearly", "one-off"] as const;
 
 export const assetSchema = z.object({
@@ -25,6 +26,7 @@ export const maintenanceRecordSchema = z
     title: requiredText("Title", 200),
     description: optionalText(5000),
     maintenanceType: z.enum(MAINTENANCE_TYPES).default("preventive"),
+    source: z.enum(MAINTENANCE_SOURCES).default("internal"),
     frequency: optionalText(30),
     scheduledDate: optionalDate,
     dueDate: optionalDate,

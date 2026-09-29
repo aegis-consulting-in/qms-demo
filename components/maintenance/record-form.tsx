@@ -19,7 +19,7 @@ import { uploadFilesToEntity } from "@/lib/documents/upload-client";
 import { useAction } from "@/lib/hooks/use-action";
 import { humanize } from "@/lib/format";
 import type { MaintenanceRecordRow } from "@/lib/types/database";
-import { MAINTENANCE_FREQUENCIES, MAINTENANCE_STATUSES, MAINTENANCE_TYPES, maintenanceRecordSchema } from "@/lib/validation/maintenance";
+import { MAINTENANCE_FREQUENCIES, MAINTENANCE_SOURCES, MAINTENANCE_STATUSES, MAINTENANCE_TYPES, maintenanceRecordSchema } from "@/lib/validation/maintenance";
 
 type Values = z.input<typeof maintenanceRecordSchema>;
 
@@ -51,6 +51,7 @@ export function MaintenanceRecordForm({
       title: record?.title ?? "",
       description: record?.description ?? "",
       maintenanceType: record?.maintenance_type ?? "preventive",
+      source: record?.source ?? "internal",
       frequency: record?.frequency ?? "",
       scheduledDate: record?.scheduled_date ?? "",
       dueDate: record?.due_date ?? "",
@@ -101,6 +102,15 @@ export function MaintenanceRecordForm({
             {MAINTENANCE_TYPES.map((t) => (
               <option key={t} value={t}>
                 {humanize(t)}
+              </option>
+            ))}
+          </NativeSelect>
+        </FormField>
+        <FormField label="Source" htmlFor="source" error={err("source")}>
+          <NativeSelect id="source" disabled={limited} {...form.register("source")}>
+            {MAINTENANCE_SOURCES.map((s) => (
+              <option key={s} value={s}>
+                {humanize(s)}
               </option>
             ))}
           </NativeSelect>

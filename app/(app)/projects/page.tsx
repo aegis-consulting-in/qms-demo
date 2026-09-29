@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { BriefcaseIcon, CheckCircle2Icon, PlayIcon, PlusIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { ProjectGantt } from "@/components/projects/project-gantt";
+import { ProjectsViewToggle } from "@/components/projects/projects-view-toggle";
 import { DataTable, type Column } from "@/components/shared/data-table";
 import { ClearFilters, FilterSelect, ListToolbar, SearchInput, SortSelect } from "@/components/shared/list-toolbar";
 import { PageHeader, Section } from "@/components/shared/page-header";
@@ -10,7 +12,7 @@ import { StatCard, StatGrid } from "@/components/shared/stat-card";
 import { StatusBadge } from "@/components/shared/status-badge";
 import { requireUser } from "@/lib/auth/guards";
 import { PERMISSIONS } from "@/lib/auth/permissions";
-import { getProjectStats, listProjects } from "@/lib/data/projects";
+import { getProjectStats, listGanttProjects, listProjects } from "@/lib/data/projects";
 import { formatDate, humanize } from "@/lib/format";
 import { paginationSchema } from "@/lib/validation/common";
 import { PROJECT_PRIORITIES, PROJECT_STATUSES } from "@/lib/validation/projects";
@@ -23,10 +25,15 @@ export default async function ProjectsPage({ searchParams }: PageProps<"/project
   const filters = paginationSchema.parse(params);
   const status = typeof params.status === "string" ? params.status : undefined;
   const priority = typeof params.priority === "string" ? params.priority : undefined;
+  const isGantt = params.view === "gantt";
 
-  const [{ rows, total }, stats] = await Promise.all([listProjects({ ...filters, status, priority }), getProjectStats()]);
+  const [list, ganttRows, stats] = await Promise.all([
+    isGantt ? Promise.resolve(null) : listProjects({ ...filters, status, priority }),
+    isGantt ? listGanttProjects({ ...filters, status, priority }) : Promise.resolve(null),
+    getProjectStats(),
+  ]);
 
-  type Project = (typeof rows)[number];
+  type Project = NonNullable<typeof list>["rows"][number];
   const columns: Column<Project>[] = [
     {
       key: "name",
@@ -71,19 +78,28 @@ export default async function ProjectsPage({ searchParams }: PageProps<"/project
             <SearchInput placeholder="Search projects…" className="w-full sm:w-72" />
             <FilterSelect param="status" placeholder="All statuses" options={PROJECT_STATUSES.map((s) => ({ value: s, label: humanize(s) }))} ariaLabel="Status" />
             <FilterSelect param="priority" placeholder="All priorities" options={PROJECT_PRIORITIES.map((p) => ({ value: p, label: humanize(p) }))} ariaLabel="Priority" />
-            <SortSelect
-              options={[
-                { value: "name", label: "Name" },
-                { value: "code", label: "Code" },
-                { value: "start", label: "Start date" },
-                { value: "status", label: "Status" },
-                { value: "priority", label: "Priority" },
-              ]}
-            />
+            {!isGantt ? (
+              <SortSelect
+                options={[
+                  { value: "name", label: "Name" },
+                  { value: "code", label: "Code" },
+                  { value: "start", label: "Start date" },
+                  { value: "status", label: "Status" },
+                  { value: "priority", label: "Priority" },
+                ]}
+              />
+            ) : null}
             <ClearFilters keys={["q", "status", "priority", "sort", "dir"]} />
+            <ProjectsViewToggle />
           </ListToolbar>
-          <DataTable columns={columns} rows={rows} rowKey={(r) => r.id} emptyTitle="No projects found" />
-          <Pagination page={filters.page} pageSize={filters.pageSize} total={total} />
+          {isGantt ? (
+            <ProjectGantt projects={ganttRows ?? []} />
+          ) : (
+            <>
+              <DataTable columns={columns} rows={list?.rows ?? []} rowKey={(r) => r.id} emptyTitle="No projects found" />
+              <Pagination page={filters.page} pageSize={filters.pageSize} total={list?.total ?? 0} />
+            </>
+          )}
         </div>
       </Section>
     </div>

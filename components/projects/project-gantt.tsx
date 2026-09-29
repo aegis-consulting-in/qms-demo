@@ -58,9 +58,22 @@ function barTone(status: string) {
   }
 }
 
-export function ProjectGantt({ projects }: { projects: GanttProject[] }) {
+export function ProjectGantt({
+  projects,
+  variant = "portfolio",
+}: {
+  projects: GanttProject[];
+  variant?: "portfolio" | "project";
+}) {
+  const isProject = variant === "project";
+
   if (!projects.length) {
-    return <EmptyState title="No projects found" description="Try clearing filters, or create a project first." />;
+    return (
+      <EmptyState
+        title={isProject ? "No milestones yet" : "No projects found"}
+        description={isProject ? "Add milestones when you edit this project." : "Try clearing filters, or create a project first."}
+      />
+    );
   }
 
   const dates = collectDates(projects);
@@ -68,7 +81,11 @@ export function ProjectGantt({ projects }: { projects: GanttProject[] }) {
     return (
       <EmptyState
         title="No dates to plot"
-        description="Add start and end dates on project milestones, then open Gantt again."
+        description={
+          isProject
+            ? "Add start and end dates on this project’s milestones, then open Gantt again."
+            : "Add start and end dates on project milestones, then open Gantt again."
+        }
       />
     );
   }
@@ -106,7 +123,7 @@ export function ProjectGantt({ projects }: { projects: GanttProject[] }) {
     <div className="overflow-x-auto rounded-lg border">
       <div className="min-w-full" style={{ minWidth: chartMinWidth }}>
         <div className="grid grid-cols-[minmax(12rem,16rem)_1fr] border-b bg-muted/40 text-[11px] font-semibold tracking-wide text-muted-foreground uppercase">
-          <div className="sticky left-0 z-20 border-r bg-muted/40 px-3 py-2">Project / milestone</div>
+          <div className="sticky left-0 z-20 border-r bg-muted/40 px-3 py-2">{isProject ? "Milestone" : "Project / milestone"}</div>
           <div className="relative h-8">
             {ticks.map((t) => (
               <span
@@ -124,7 +141,9 @@ export function ProjectGantt({ projects }: { projects: GanttProject[] }) {
           const rows: { key: string; label: ReactNode; href: string; start: string | null; end: string | null; status: string; isProject?: boolean }[] = [
             {
               key: project.id,
-              label: (
+              label: isProject ? (
+                <span className="block truncate font-medium">Overall</span>
+              ) : (
                 <div className="min-w-0">
                   <Link href={`/projects/${project.id}`} className="block truncate font-medium hover:underline">
                     {project.name}
@@ -140,7 +159,7 @@ export function ProjectGantt({ projects }: { projects: GanttProject[] }) {
             },
             ...project.milestones.map((m) => ({
               key: m.id,
-              label: <span className="block truncate pl-3 text-muted-foreground">{m.name}</span>,
+              label: <span className={cn("block truncate", isProject ? "font-medium" : "pl-3 text-muted-foreground")}>{m.name}</span>,
               href: `/projects/${project.id}`,
               start: m.start_date,
               end: m.end_date,
@@ -217,7 +236,9 @@ export function ProjectGantt({ projects }: { projects: GanttProject[] }) {
           <span className="h-3 w-px bg-destructive/70" /> Today
         </span>
         <span className="ml-auto hidden sm:inline">
-          {projects.length} project{projects.length === 1 ? "" : "s"}
+          {isProject
+            ? `${projects[0]?.milestones.length ?? 0} milestone${(projects[0]?.milestones.length ?? 0) === 1 ? "" : "s"}`
+            : `${projects.length} project${projects.length === 1 ? "" : "s"}`}
         </span>
       </div>
     </div>

@@ -90,7 +90,7 @@ export default async function ProjectsPage({ searchParams }: PageProps<"/project
               />
             ) : null}
             <ClearFilters keys={["q", "status", "priority", "sort", "dir"]} />
-            <ProjectsViewToggle />
+            <ProjectsViewToggle className="ml-auto" />
           </ListToolbar>
           {isGantt ? (
             <ProjectGantt projects={ganttRows ?? []} />

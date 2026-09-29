@@ -5,12 +5,12 @@ import { Button } from "@/components/ui/button";
 import { useUrlParams } from "@/components/shared/list-toolbar";
 import { cn } from "cn";
 
-export function ProjectsViewToggle() {
+export function ProjectsViewToggle({ className }: { className?: string }) {
   const { searchParams, set } = useUrlParams();
   const view = searchParams.get("view") === "gantt" ? "gantt" : "list";
 
   return (
-    <div className="ml-auto inline-flex rounded-md border p-0.5" role="tablist" aria-label="Projects view">
+    <div className={cn("inline-flex rounded-md border p-0.5", className)} role="tablist" aria-label="View">
       <Button
         type="button"
         size="sm"

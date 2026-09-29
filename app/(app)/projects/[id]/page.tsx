@@ -2,7 +2,9 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { DocumentsPanel } from "@/components/documents/documents-panel";
+import { ProjectGantt } from "@/components/projects/project-gantt";
 import { ProjectMembers } from "@/components/projects/project-members";
+import { ProjectsViewToggle } from "@/components/projects/projects-view-toggle";
 import { DataTable, DetailList, type Column } from "@/components/shared/data-table";
 import { EntityActions } from "@/components/shared/entity-actions";
 import { PageHeader, Section } from "@/components/shared/page-header";
@@ -16,9 +18,11 @@ import { formatDate, formatDateTime } from "@/lib/format";
 
 export const metadata: Metadata = { title: "Project" };
 
-export default async function ProjectDetailPage({ params }: PageProps<"/projects/[id]">) {
+export default async function ProjectDetailPage({ params, searchParams }: PageProps<"/projects/[id]">) {
   const user = await requireUser();
   const { id } = await params;
+  const query = await searchParams;
+  const isGantt = query.view === "gantt";
   const project = await getProject(id);
   if (!project) notFound();
 
@@ -96,14 +100,32 @@ export default async function ProjectDetailPage({ params }: PageProps<"/projects
             ? `${milestones.length} milestone${milestones.length === 1 ? "" : "s"}`
             : "Start and end dates are tracked per milestone."
         }
+        actions={<ProjectsViewToggle />}
       >
-        <DataTable
-          columns={milestoneColumns}
-          rows={milestones}
-          rowKey={(m) => m.id}
-          emptyTitle="No milestones yet"
-          emptyDescription="Add milestones when you edit this project. Dates sit against each milestone."
-        />
+        {isGantt ? (
+          <ProjectGantt
+            variant="project"
+            projects={[
+              {
+                id: project.id,
+                name: project.name,
+                code: project.code,
+                status: project.status,
+                start_date: project.start_date,
+                expected_end_date: project.expected_end_date,
+                milestones,
+              },
+            ]}
+          />
+        ) : (
+          <DataTable
+            columns={milestoneColumns}
+            rows={milestones}
+            rowKey={(m) => m.id}
+            emptyTitle="No milestones yet"
+            emptyDescription="Add milestones when you edit this project. Dates sit against each milestone."
+          />
+        )}
       </Section>
 
       <DocumentsPanel module="project" entityId={project.id} title="Project documents" />

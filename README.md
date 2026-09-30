@@ -38,11 +38,11 @@ After you run migrations, `supabase/seed.sql` and `npm run seed`:
 | `admin@skillhub.local` | Admin | `SkillHub123!` |
 | `manager@skillhub.local` | Manager | `SkillHub123!` |
 | `employee@skillhub.local` | Employee | `SkillHub123!` |
-| `auditor@skillhub.local` | Auditor | `SkillHub123!` |
-| `training@skillhub.local` | Training Manager | `SkillHub123!` |
-| `projects@skillhub.local` | Project Manager | `SkillHub123!` |
-| `suppliers@skillhub.local` | Supplier Manager | `SkillHub123!` |
-| `maintenance@skillhub.local` | Maintenance Manager | `SkillHub123!` |
+| `auditor@skillhub.local` | Quality & Compliance | `SkillHub123!` |
+| `training@skillhub.local` | Finance & Administration | `SkillHub123!` |
+| `projects@skillhub.local` | Construction Management | `SkillHub123!` |
+| `suppliers@skillhub.local` | Finance & Administration | `SkillHub123!` |
+| `maintenance@skillhub.local` | Finance & Administration | `SkillHub123!` |
 
 Override the password with `SEED_DEMO_PASSWORD` in `.env.local` before seeding.
 

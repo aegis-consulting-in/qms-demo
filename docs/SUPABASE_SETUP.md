@@ -48,7 +48,8 @@ The schema, functions, RLS policies and storage policies are in:
 | `supabase/migrations/20260928000003_storage.sql` | Private `documents` bucket and storage policies |
 | `supabase/migrations/20260928000004_milestones_and_audit_type.sql` | Project milestones and audit Internal/External type |
 | `supabase/migrations/20260928000005_maintenance_source.sql` | Preventive maintenance Internal/External source |
-| `supabase/seed.sql` | Permissions, roles, role grants, departments, job titles, training levels/statuses, system settings |
+| `supabase/migrations/20260928000006_rbac_org_roles.sql` | Org-chart roles (Finance & Admin, Construction, Quality) |
+| `supabase/seed.sql` | Permissions, roles, role grants, departments, job titles, training levels/status, system settings |
 
 ### Option A — SQL editor (no CLI)
 
@@ -58,7 +59,8 @@ The schema, functions, RLS policies and storage policies are in:
 4. Paste and **Run** `20260928000003_storage.sql`.
 5. Paste and **Run** `20260928000004_milestones_and_audit_type.sql`.
 6. Paste and **Run** `20260928000005_maintenance_source.sql`.
-7. Paste and **Run** `supabase/seed.sql`.
+7. Paste and **Run** `20260928000006_rbac_org_roles.sql`.
+8. Paste and **Run** `supabase/seed.sql`.
 
 Run them in that order. If a statement says a type or table already exists, you can ignore that run or start from a fresh project.
 
@@ -154,7 +156,7 @@ npm run dev
 2. Sign in as `admin@skillhub.local`.
 3. Home shows the six modules and four document folders.
 4. Open **Admin Settings → Roles** and confirm permissions.
-5. Upload a PDF on a training detail page, then open it from **Training Documents**.
+5. Upload a PDF on a training detail page, then open it from **HR Documents**.
 6. Sign in as `employee@skillhub.local` and confirm **My Trainings** only, no Admin module.
 
 If login fails with “Invalid login credentials”, the seed has not run or the email provider is misconfigured.

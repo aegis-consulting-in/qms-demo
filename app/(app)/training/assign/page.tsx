@@ -29,7 +29,7 @@ export default async function AssignTrainingPage() {
       <PageHeader
         title="Create Employee Training"
         description="Assign a training from the catalogue to employees and set a due date."
-        crumbs={[{ label: "Training", href: "/training" }, { label: "Assign" }]}
+        crumbs={[{ label: "HR", href: "/training" }, { label: "Assign" }]}
       />
       <Section>
         {trainings.length ? (

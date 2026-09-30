@@ -19,7 +19,7 @@ export default async function EditTrainingPage({ params }: PageProps<"/training/
     <div className="flex flex-col gap-5">
       <PageHeader
         title={`Edit ${training.name}`}
-        crumbs={[{ label: "Training", href: "/training" }, { label: training.name, href: `/training/${training.id}` }, { label: "Edit" }]}
+        crumbs={[{ label: "HR", href: "/training" }, { label: training.name, href: `/training/${training.id}` }, { label: "Edit" }]}
       />
       <Section>
         <TrainingForm training={training} levels={levels} statuses={statuses} />

@@ -8,7 +8,7 @@ export function buildStoragePath(module: DocumentModule, entityId: string, objec
 }
 
 export const MODULE_LABELS: Record<DocumentModule, string> = {
-  training: "Training",
+  training: "HR",
   project: "Project",
   supplier: "Supplier",
   "preventive-maintenance": "Preventive Maintenance",

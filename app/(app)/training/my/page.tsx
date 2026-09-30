@@ -16,7 +16,7 @@ export default async function MyTrainingsPage() {
   if (!user.employee) {
     return (
       <div className="flex flex-col gap-5">
-        <PageHeader title="My Trainings" crumbs={[{ label: "Training", href: "/training" }, { label: "My Trainings" }]} />
+        <PageHeader title="My Trainings" crumbs={[{ label: "HR", href: "/training" }, { label: "My Trainings" }]} />
         <Alert>
           <AlertTitle>No employee record linked</AlertTitle>
           <AlertDescription>Your login isn&apos;t linked to an employee yet, so no trainings can be assigned to you. Ask an administrator to link your account.</AlertDescription>
@@ -33,7 +33,7 @@ export default async function MyTrainingsPage() {
 
   return (
     <div className="flex flex-col gap-5">
-      <PageHeader title="My Trainings" description="Trainings assigned to you. Update your progress as you go." crumbs={[{ label: "Training", href: "/training" }, { label: "My Trainings" }]} />
+      <PageHeader title="My Trainings" description="Trainings assigned to you. Update your progress as you go." crumbs={[{ label: "HR", href: "/training" }, { label: "My Trainings" }]} />
 
       <StatGrid>
         <StatCard label="Open" value={open.length} icon={BookOpenIcon} />

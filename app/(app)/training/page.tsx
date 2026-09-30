@@ -13,7 +13,7 @@ import { PageHeader } from "@/components/shared/page-header";
 import { requireUser } from "@/lib/auth/guards";
 import { PERMISSIONS } from "@/lib/auth/permissions";
 
-export const metadata: Metadata = { title: "Training Management" };
+export const metadata: Metadata = { title: "HR" };
 
 type Tile = { label: string; description: string; href: string; icon: LucideIcon; show: boolean };
 
@@ -68,11 +68,11 @@ export default async function TrainingHubPage() {
   return (
     <div className="flex flex-col gap-6">
       <PageHeader
-        title="Training Management"
-        description="Catalogue, assignments and progress tracking."
-        crumbs={[{ label: "Training" }]}
+        title="HR"
+        description="People, training and HR records."
+        crumbs={[{ label: "HR" }]}
       />
-      <section className="grid gap-3 sm:grid-cols-2" aria-label="Training sections">
+      <section className="grid gap-3 sm:grid-cols-2" aria-label="HR sections">
         {tiles
           .filter((t) => t.show)
           .map((t) => (

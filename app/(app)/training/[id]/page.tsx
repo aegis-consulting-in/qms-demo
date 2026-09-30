@@ -45,7 +45,7 @@ export default async function TrainingDetailPage({ params }: PageProps<"/trainin
           </span>
         }
         description={[training.code, training.level?.name, training.duration_hours ? `${training.duration_hours} hours` : null].filter(Boolean).join(" · ")}
-        crumbs={[{ label: "Training", href: "/training" }, { label: training.name }]}
+        crumbs={[{ label: "HR", href: "/training" }, { label: training.name }]}
         actions={
           <TrainingActions
             training={training}

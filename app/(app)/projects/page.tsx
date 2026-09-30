@@ -76,7 +76,7 @@ export default async function ProjectsPage({ searchParams }: PageProps<"/project
         <div className="flex flex-col gap-3">
           <ListToolbar>
             <SearchInput placeholder="Search projects…" className="w-full sm:w-72" />
-            <FilterSelect param="status" placeholder="All statuses" options={PROJECT_STATUSES.map((s) => ({ value: s, label: humanize(s) }))} ariaLabel="Status" />
+            <FilterSelect param="status" placeholder="All status" options={PROJECT_STATUSES.map((s) => ({ value: s, label: humanize(s) }))} ariaLabel="Status" />
             <FilterSelect param="priority" placeholder="All priorities" options={PROJECT_PRIORITIES.map((p) => ({ value: p, label: humanize(p) }))} ariaLabel="Priority" />
             {!isGantt ? (
               <SortSelect

@@ -15,7 +15,7 @@ export default async function AdminTrainingConfigPage() {
     <div className="flex flex-col gap-5">
       <PageHeader
         title="Training Configuration"
-        description="Levels and statuses used when creating trainings."
+        description="Levels and status used when creating trainings."
         crumbs={[{ label: "Admin", href: "/admin" }, { label: "Training configuration" }]}
       />
       <AdminNav can={(k) => user.can(k)} current="training-config" />
@@ -23,7 +23,7 @@ export default async function AdminTrainingConfigPage() {
         <Section title="Training levels">
           <TrainingConfigList table="training_levels" items={levels} />
         </Section>
-        <Section title="Training statuses">
+        <Section title="Training status">
           <TrainingConfigList table="training_statuses" items={statuses} />
         </Section>
       </div>

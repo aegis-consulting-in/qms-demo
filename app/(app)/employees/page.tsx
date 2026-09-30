@@ -92,7 +92,7 @@ export default async function EmployeesPage({ searchParams }: PageProps<"/employ
               placeholder="Active"
               options={[
                 { value: "inactive", label: "Inactive" },
-                { value: "all", label: "All statuses" },
+                { value: "all", label: "All status" },
               ]}
               ariaLabel="Status"
             />

@@ -74,7 +74,7 @@ export default async function TrainingEmployeesPage({ searchParams }: PageProps<
 
   return (
     <div className="flex flex-col gap-5">
-      <PageHeader title="Employee Details" description="Training status for the people you can see." crumbs={[{ label: "Training", href: "/training" }, { label: "Employee Details" }]} />
+      <PageHeader title="Employee Details" description="Training status for the people you can see." crumbs={[{ label: "HR", href: "/training" }, { label: "Employee Details" }]} />
       <Section>
         <div className="flex flex-col gap-3">
           <ListToolbar>

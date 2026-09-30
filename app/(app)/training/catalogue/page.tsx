@@ -61,7 +61,7 @@ export default async function TrainingCataloguePage({ searchParams }: PageProps<
       <PageHeader
         title="Training catalogue"
         description="Courses available for assignment."
-        crumbs={[{ label: "Training", href: "/training" }, { label: "Catalogue" }]}
+        crumbs={[{ label: "HR", href: "/training" }, { label: "Catalogue" }]}
         actions={
           user.can(PERMISSIONS.training.create) ? (
             <Button render={<Link href="/training/new" />}>
@@ -83,7 +83,7 @@ export default async function TrainingCataloguePage({ searchParams }: PageProps<
           <ListToolbar>
             <SearchInput placeholder="Search trainings…" className="w-full sm:w-72" />
             <FilterSelect param="level" placeholder="All levels" options={levels.map((l) => ({ value: l.id, label: l.name }))} ariaLabel="Level" />
-            <FilterSelect param="status" placeholder="All statuses" options={statuses.map((s) => ({ value: s.id, label: s.name }))} ariaLabel="Status" />
+            <FilterSelect param="status" placeholder="All status" options={statuses.map((s) => ({ value: s.id, label: s.name }))} ariaLabel="Status" />
             <SortSelect
               options={[
                 { value: "name", label: "Name" },

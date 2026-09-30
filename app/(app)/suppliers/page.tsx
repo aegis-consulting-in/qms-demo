@@ -84,7 +84,7 @@ export default async function SuppliersPage({ searchParams }: PageProps<"/suppli
         <div className="flex flex-col gap-3">
           <ListToolbar>
             <SearchInput placeholder="Search suppliers…" className="w-full sm:w-72" />
-            <FilterSelect param="status" placeholder="All statuses" options={SUPPLIER_STATUSES.map((s) => ({ value: s, label: humanize(s) }))} ariaLabel="Status" />
+            <FilterSelect param="status" placeholder="All status" options={SUPPLIER_STATUSES.map((s) => ({ value: s, label: humanize(s) }))} ariaLabel="Status" />
             {categories.length ? <FilterSelect param="category" placeholder="All categories" options={categories.map((c) => ({ value: c, label: c }))} ariaLabel="Category" /> : null}
             <SortSelect
               options={[

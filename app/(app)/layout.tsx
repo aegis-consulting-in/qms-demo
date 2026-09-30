@@ -12,7 +12,7 @@ export default async function AppLayout({ children }: LayoutProps<"/">) {
     label: m.label,
     href: m.href,
   }));
-  // Employee directory is nested under Training in the mock; still expose it in the header/mobile nav when permitted.
+  // Employee directory is nested under HR; still expose it in the header/mobile nav when permitted.
   if (user.canAny(EMPLOYEE_MODULE.permissions) && !visibleModules.some((m) => m.key === "employees")) {
     visibleModules.splice(1, 0, { key: EMPLOYEE_MODULE.key, label: EMPLOYEE_MODULE.label, href: EMPLOYEE_MODULE.href });
   }

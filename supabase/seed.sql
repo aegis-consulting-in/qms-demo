@@ -65,14 +65,12 @@ on conflict (key) do update
 -- Roles
 -- -----------------------------------------------------------------------------
 insert into public.roles (name, description, is_system) values
-  ('Admin',               'Full access to every module and to system administration', true),
-  ('Manager',             'People manager: sees their team, their team''s trainings and shared documents', true),
-  ('Employee',            'Standard employee: own trainings and own documents', true),
-  ('Auditor',             'Plans and executes audits, records findings and corrective actions', false),
-  ('Training Manager',    'Owns the training catalogue and assignments for the whole organisation', false),
-  ('Project Manager',     'Creates and runs projects', false),
-  ('Supplier Manager',    'Maintains the supplier register', false),
-  ('Maintenance Manager', 'Maintains assets and preventive maintenance schedules', false)
+  ('Admin',                       'Managing director / full access to every module and system administration', true),
+  ('Manager',                     'People manager: sees their team, their team''s trainings and shared documents', true),
+  ('Employee',                    'Standard employee: own trainings and own documents', true),
+  ('Finance & Administration',    'Owns HR, supplier approvals, maintenance/calibration and document control', false),
+  ('Construction Management',     'Owns project management and subcontractor control', false),
+  ('Quality & Compliance',        'Owns internal audit, findings and CAPA', false)
 on conflict (name) do update
   set description = excluded.description,
       is_system = excluded.is_system;
@@ -110,31 +108,23 @@ select pg_temp.grant_permissions('Manager', array[
   'documents.view', 'documents.upload', 'documents.download'
 ]);
 
-select pg_temp.grant_permissions('Auditor', array[
+select pg_temp.grant_permissions('Quality & Compliance', array[
   'audit.view', 'audit.create', 'audit.edit',
   'employee.view',
   'documents.view', 'documents.upload', 'documents.download'
 ]);
 
-select pg_temp.grant_permissions('Training Manager', array[
+select pg_temp.grant_permissions('Finance & Administration', array[
   'training.view', 'training.create', 'training.edit', 'training.delete', 'training.assign', 'training.team',
-  'employee.view',
-  'documents.view', 'documents.upload', 'documents.download', 'documents.delete'
-]);
-
-select pg_temp.grant_permissions('Project Manager', array[
-  'project.view', 'project.create', 'project.edit', 'project.delete',
-  'employee.view',
-  'documents.view', 'documents.upload', 'documents.download', 'documents.delete'
-]);
-
-select pg_temp.grant_permissions('Supplier Manager', array[
+  'employee.view', 'employee.create', 'employee.edit', 'employee.delete',
   'supplier.view', 'supplier.create', 'supplier.edit', 'supplier.delete',
+  'maintenance.view', 'maintenance.create', 'maintenance.edit', 'maintenance.delete',
   'documents.view', 'documents.upload', 'documents.download', 'documents.delete'
 ]);
 
-select pg_temp.grant_permissions('Maintenance Manager', array[
-  'maintenance.view', 'maintenance.create', 'maintenance.edit', 'maintenance.delete',
+select pg_temp.grant_permissions('Construction Management', array[
+  'project.view', 'project.create', 'project.edit', 'project.delete',
+  'supplier.view',
   'employee.view',
   'documents.view', 'documents.upload', 'documents.download', 'documents.delete'
 ]);
@@ -143,6 +133,10 @@ select pg_temp.grant_permissions('Maintenance Manager', array[
 -- Departments and job titles
 -- -----------------------------------------------------------------------------
 insert into public.departments (name, code, description) values
+  ('Finance & Business Administration', 'FBA', 'HR, purchasing, asset management and document control'),
+  ('Commercial & Sales', 'COM', 'RFT/RFQ, project proposals and fee agreements'),
+  ('Construction Management', 'CON', 'Project management and subcontractor control'),
+  ('Quality & Compliance', 'QC', 'Internal audit and CAPA'),
   ('Human Resources',   'HR',  'People operations, onboarding and training compliance'),
   ('Quality Assurance', 'QA',  'Quality system ownership, audits and CAPA'),
   ('Production',        'PRD', 'Manufacturing and line operations'),
@@ -153,6 +147,8 @@ insert into public.departments (name, code, description) values
 on conflict (name) do update set code = excluded.code, description = excluded.description;
 
 insert into public.job_titles (name) values
+  ('Managing Director'),
+  ('Finance & Administration Manager'),
   ('HR Manager'),
   ('HR Executive'),
   ('Quality Manager'),
@@ -162,6 +158,7 @@ insert into public.job_titles (name) values
   ('Maintenance Engineer'),
   ('Maintenance Technician'),
   ('Project Manager'),
+  ('Construction Manager'),
   ('Business Analyst'),
   ('Procurement Lead'),
   ('Internal Auditor'),

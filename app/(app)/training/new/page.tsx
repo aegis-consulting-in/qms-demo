@@ -12,7 +12,7 @@ export default async function NewTrainingPage() {
   const [levels, statuses] = await Promise.all([getTrainingLevels(), getTrainingStatuses()]);
   return (
     <div className="flex flex-col gap-5">
-      <PageHeader title="Create New Training" crumbs={[{ label: "Training", href: "/training" }, { label: "New" }]} />
+      <PageHeader title="Create New Training" crumbs={[{ label: "HR", href: "/training" }, { label: "New" }]} />
       <Section>
         <TrainingForm levels={levels} statuses={statuses} />
       </Section>

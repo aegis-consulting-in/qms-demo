@@ -126,11 +126,11 @@ async function seed() {
   await assignRole(users.admin, roles.Admin);
   await assignRole(users.manager, roles.Manager);
   await assignRole(users.employee, roles.Employee);
-  await assignRole(users.auditor, roles.Auditor);
-  await assignRole(users.training, roles["Training Manager"]);
-  await assignRole(users.projects, roles["Project Manager"]);
-  await assignRole(users.suppliers, roles["Supplier Manager"]);
-  await assignRole(users.maintenance, roles["Maintenance Manager"]);
+  await assignRole(users.auditor, roles["Quality & Compliance"]);
+  await assignRole(users.training, roles["Finance & Administration"]);
+  await assignRole(users.projects, roles["Construction Management"]);
+  await assignRole(users.suppliers, roles["Finance & Administration"]);
+  await assignRole(users.maintenance, roles["Finance & Administration"]);
 
   const emp: Record<string, string> = {};
   emp.admin = await upsertEmployee({
@@ -452,14 +452,14 @@ async function seed() {
 
   console.log(`
 Demo users (password: ${DEMO_PASSWORD})
-  admin@skillhub.local          Admin
+  admin@skillhub.local          Admin (Managing Director)
   manager@skillhub.local        Manager (Production Supervisor)
   employee@skillhub.local       Employee (reports to James)
-  auditor@skillhub.local        Auditor
-  training@skillhub.local       Training Manager
-  projects@skillhub.local       Project Manager
-  suppliers@skillhub.local      Supplier Manager
-  maintenance@skillhub.local    Maintenance Manager
+  auditor@skillhub.local        Quality & Compliance
+  training@skillhub.local       Finance & Administration
+  projects@skillhub.local       Construction Management
+  suppliers@skillhub.local      Finance & Administration
+  maintenance@skillhub.local    Finance & Administration
 `);
 }
 

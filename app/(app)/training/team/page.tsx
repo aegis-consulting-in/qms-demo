@@ -58,7 +58,7 @@ export default async function TeamTrainingsPage({ searchParams }: PageProps<"/tr
       <PageHeader
         title="Manage Team Trainings"
         description={orgWide ? "All training assignments across the organisation." : "Assignments for everyone in your reporting line."}
-        crumbs={[{ label: "Training", href: "/training" }, { label: "Team" }]}
+        crumbs={[{ label: "HR", href: "/training" }, { label: "Team" }]}
         actions={
           <Button render={<Link href="/training/assign" />}>
             <UserPlusIcon /> Assign training
@@ -76,7 +76,7 @@ export default async function TeamTrainingsPage({ searchParams }: PageProps<"/tr
       <Section>
         <div className="flex flex-col gap-3">
           <ListToolbar>
-            <FilterSelect param="status" placeholder="All statuses" options={ASSIGNMENT_STATUSES.map((s) => ({ value: s, label: humanize(s) }))} ariaLabel="Status" />
+            <FilterSelect param="status" placeholder="All status" options={ASSIGNMENT_STATUSES.map((s) => ({ value: s, label: humanize(s) }))} ariaLabel="Status" />
             <ClearFilters keys={["status"]} />
           </ListToolbar>
           <AssignmentsTable rows={result.rows} show="both" mode="manage" canDelete={orgWide} emptyTitle="No assignments" emptyDescription="Assign a training to get started." />

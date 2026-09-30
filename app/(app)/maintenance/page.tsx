@@ -137,7 +137,7 @@ export default async function MaintenancePage({ searchParams }: PageProps<"/main
           <div className="flex flex-col gap-3">
             <ListToolbar>
               <SearchInput placeholder="Search records…" className="w-full sm:w-72" />
-              <FilterSelect param="status" placeholder="All statuses" options={MAINTENANCE_STATUSES.map((s) => ({ value: s, label: humanize(s) }))} ariaLabel="Status" />
+              <FilterSelect param="status" placeholder="All status" options={MAINTENANCE_STATUSES.map((s) => ({ value: s, label: humanize(s) }))} ariaLabel="Status" />
               <FilterSelect param="type" placeholder="All types" options={MAINTENANCE_TYPES.map((t) => ({ value: t, label: humanize(t) }))} ariaLabel="Type" />
               <FilterSelect param="source" placeholder="All sources" options={MAINTENANCE_SOURCES.map((s) => ({ value: s, label: humanize(s) }))} ariaLabel="Source" />
               {assetOptions.length ? (

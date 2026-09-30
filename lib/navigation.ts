@@ -28,8 +28,8 @@ export type ModuleDef = {
 export const MODULES: ModuleDef[] = [
   {
     key: "training",
-    label: "Training Management",
-    description: "Catalogue, assignments and team progress",
+    label: "HR",
+    description: "People, training and HR records",
     href: "/training",
     icon: GraduationCapIcon,
     permissions: [], // everyone has "My Trainings"
@@ -76,7 +76,7 @@ export const MODULES: ModuleDef[] = [
   },
 ];
 
-/** Secondary module (reached from Training → Employee Details). Not on the home list. */
+/** Secondary module (reached from HR → Employee Details). Not on the home list. */
 export const EMPLOYEE_MODULE: ModuleDef = {
   key: "employees",
   label: "Employee Management",
@@ -96,7 +96,7 @@ export type FolderDef = {
 
 /** Folder shortcuts. `home: true` appears on the dashboard row (matches the mock). */
 export const FOLDERS: FolderDef[] = [
-  { key: "training", label: "Training Documents", href: "/documents/training", icon: FolderIcon, home: true },
+  { key: "training", label: "HR Documents", href: "/documents/training", icon: FolderIcon, home: true },
   { key: "project", label: "Project Documents", href: "/documents/project", icon: FolderIcon, home: true },
   { key: "supplier", label: "Supplier Documents", href: "/documents/supplier", icon: FolderIcon, home: true },
   { key: "preventive-maintenance", label: "Preventive Maintenance", href: "/documents/preventive-maintenance", icon: FolderIcon, home: true },
@@ -158,7 +158,7 @@ export const ADMIN_SECTIONS: AdminSection[] = [
   {
     key: "training-config",
     label: "Training Configuration",
-    description: "Training levels and statuses used in the catalogue",
+    description: "Training levels and status used in the catalogue",
     href: "/admin/training-config",
     icon: GraduationCapIcon,
     permissions: [PERMISSIONS.admin.settings],

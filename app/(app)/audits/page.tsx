@@ -77,7 +77,7 @@ export default async function AuditsPage({ searchParams }: PageProps<"/audits">)
         <div className="flex flex-col gap-3">
           <ListToolbar>
             <SearchInput placeholder="Search audits…" className="w-full sm:w-72" />
-            <FilterSelect param="status" placeholder="All statuses" options={AUDIT_STATUSES.map((s) => ({ value: s, label: humanize(s) }))} ariaLabel="Status" />
+            <FilterSelect param="status" placeholder="All status" options={AUDIT_STATUSES.map((s) => ({ value: s, label: humanize(s) }))} ariaLabel="Status" />
             <FilterSelect param="type" placeholder="All types" options={AUDIT_TYPES.map((t) => ({ value: t, label: humanize(t) }))} ariaLabel="Audit type" />
             <FilterSelect param="department" placeholder="All departments" options={departments.map((d) => ({ value: d.id, label: d.name }))} ariaLabel="Department" />
             <SortSelect
